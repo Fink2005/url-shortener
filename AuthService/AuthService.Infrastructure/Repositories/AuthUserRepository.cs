@@ -22,6 +22,18 @@ public class AuthUserRepository : IAuthUserRepository
     public Task<AuthUser?> FindByIdAsync(Guid id)
         => _db.AuthUsers.FirstOrDefaultAsync(x => x.Id == id);
 
+    public async Task<AuthUser?> DeleteByIdAsync(Guid id)
+    {
+        var user = await _db.AuthUsers.FirstOrDefaultAsync(x => x.Id == id);
+        if (user == null)
+            return null;
+
+        _db.AuthUsers.Remove(user);
+        await _db.SaveChangesAsync();
+        return user;
+    }
+
+
     public async Task AddAsync(AuthUser user) => await _db.AuthUsers.AddAsync(user);
     public Task SaveChangesAsync() => _db.SaveChangesAsync();
 }

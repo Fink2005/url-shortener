@@ -8,24 +8,24 @@ using FluentValidation;
 
 namespace AuthService.Application.Commands;
 
-public class RegisterUserHandler
+public class RegisterAuthHandler
 {
     private readonly IAuthUserRepository _repo;
     private readonly PasswordHasher<string> _hasher = new();
     private readonly IJwtTokenService _jwt;
-    private readonly IValidator<RegisterUserRequest> _validator;
+    private readonly IValidator<RegisterAuthRequest> _validator;
 
-    public RegisterUserHandler(
+    public RegisterAuthHandler(
         IAuthUserRepository repo,
         IJwtTokenService jwt,
-        IValidator<RegisterUserRequest> validator)
+        IValidator<RegisterAuthRequest> validator)
     {
         _repo = repo;
         _jwt = jwt;
         _validator = validator;
     }
 
-    public async Task<RegisterUserResponse> Handle(RegisterUserRequest req)
+    public async Task<RegisterAuthResponse> Handle(RegisterAuthRequest req)
     {
         await _validator.ValidateAndThrowAsync(req);
 
@@ -44,6 +44,6 @@ public class RegisterUserHandler
         await _repo.AddAsync(user);
         await _repo.SaveChangesAsync();
 
-        return new RegisterUserResponse(true);
+        return new RegisterAuthResponse(true);
     }
 }

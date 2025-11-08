@@ -1,19 +1,20 @@
+
 using MassTransit;
 using Contracts.Auth;
 using AuthService.Application.Commands;
 
 namespace AuthService.Api.Consumers;
 
-public class LoginUserConsumer : IConsumer<LoginUserRequest>
+public class DeleteAuthConsumer : IConsumer<DeleteAuthRequest>
 {
-    private readonly LoginUserHandler _handler;
+    private readonly DeleteAuthHandler _handler;
 
-    public LoginUserConsumer(LoginUserHandler handler)
+    public DeleteAuthConsumer(DeleteAuthHandler handler)
     {
         _handler = handler;
     }
 
-    public async Task Consume(ConsumeContext<LoginUserRequest> context)
+    public async Task Consume(ConsumeContext<DeleteAuthRequest> context)
     {
         var result = await _handler.Handle(context.Message);
         await context.RespondAsync(result);

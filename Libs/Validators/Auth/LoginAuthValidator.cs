@@ -3,9 +3,9 @@ using Contracts.Auth;
 
 namespace Validators.Auth;
 
-public class LoginUserValidator : AbstractValidator<LoginUserRequest>
+public class LoginAuthValidator : AbstractValidator<LoginAuthRequest>
 {
-    public LoginUserValidator()
+    public LoginAuthValidator()
     {
         RuleFor(x => x.Username)
             .NotEmpty().WithMessage("Username is required");

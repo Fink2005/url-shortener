@@ -6,14 +6,14 @@ using Contracts.Auth;
 
 namespace AuthService.Application.Commands;
 
-public class LoginUserHandler
+public class LoginAuthHandler
 {
     private readonly IAuthUserRepository _repo;
     private readonly PasswordHasher<string> _hasher = new();
     private readonly IJwtTokenService _jwt;
-    private readonly IValidator<LoginUserRequest> _validator;
+    private readonly IValidator<LoginAuthRequest> _validator;
 
-    public LoginUserHandler(IAuthUserRepository repo, IJwtTokenService jwt, IValidator<LoginUserRequest> validator)
+    public LoginAuthHandler(IAuthUserRepository repo, IJwtTokenService jwt, IValidator<LoginAuthRequest> validator)
     {
         _repo = repo;
         _jwt = jwt;
@@ -21,7 +21,7 @@ public class LoginUserHandler
 
     }
 
-    public async Task<LoginUserResponse> Handle(LoginUserRequest req)
+    public async Task<LoginAuthResponse> Handle(LoginAuthRequest req)
     {
         await _validator.ValidateAndThrowAsync(req);
 
@@ -38,6 +38,6 @@ public class LoginUserHandler
         user.SetRefreshToken(hashRefresh, expireAt);
         await _repo.SaveChangesAsync();
 
-        return new LoginUserResponse(access, plainRefresh);
+        return new LoginAuthResponse(access, plainRefresh);
     }
 }

@@ -4,16 +4,16 @@ using AuthService.Application.Commands;
 
 namespace AuthService.Api.Consumers;
 
-public class RegisterUserConsumer : IConsumer<RegisterUserRequest>
+public class LoginAuthConsumer : IConsumer<LoginAuthRequest>
 {
-    private readonly RegisterUserHandler _handler;
+    private readonly LoginAuthHandler _handler;
 
-    public RegisterUserConsumer(RegisterUserHandler handler)
+    public LoginAuthConsumer(LoginAuthHandler handler)
     {
         _handler = handler;
     }
 
-    public async Task Consume(ConsumeContext<RegisterUserRequest> context)
+    public async Task Consume(ConsumeContext<LoginAuthRequest> context)
     {
         var result = await _handler.Handle(context.Message);
         await context.RespondAsync(result);

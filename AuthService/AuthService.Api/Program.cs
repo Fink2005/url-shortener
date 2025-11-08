@@ -25,18 +25,20 @@ builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
 // Handlers (đăng ký những cái bạn dùng)
-builder.Services.AddScoped<RegisterUserHandler>();
-builder.Services.AddScoped<LoginUserHandler>();
+builder.Services.AddScoped<RegisterAuthHandler>();
+builder.Services.AddScoped<LoginAuthHandler>();
 builder.Services.AddScoped<RefreshTokenHandler>();
+builder.Services.AddScoped<DeleteAuthHandler>();
 builder.Services.AddScoped<LogoutHandler>();
-builder.Services.AddValidatorsFromAssembly(typeof(RegisterUserValidator).Assembly);
+builder.Services.AddValidatorsFromAssembly(typeof(RegisterAuthValidator).Assembly);
 // MassTransit
 builder.Services.AddMassTransit(x =>
 {
-    x.AddConsumer<RegisterUserConsumer>();
-    x.AddConsumer<LoginUserConsumer>();
+    x.AddConsumer<RegisterAuthConsumer>();
+    x.AddConsumer<LoginAuthConsumer>();
     x.AddConsumer<RefreshTokenConsumer>();
     x.AddConsumer<LogoutConsumer>();
+    x.AddConsumer<DeleteAuthConsumer>();
 
     x.UsingRabbitMq((context, cfg) =>
     {
@@ -48,10 +50,11 @@ builder.Services.AddMassTransit(x =>
 
         cfg.ReceiveEndpoint("auth-service-queue", e =>
         {
-            e.ConfigureConsumer<RegisterUserConsumer>(context);
-            e.ConfigureConsumer<LoginUserConsumer>(context);
+            e.ConfigureConsumer<RegisterAuthConsumer>(context);
+            e.ConfigureConsumer<LoginAuthConsumer>(context);
             e.ConfigureConsumer<RefreshTokenConsumer>(context);
             e.ConfigureConsumer<LogoutConsumer>(context);
+            e.ConfigureConsumer<DeleteAuthConsumer>(context);
         });
     });
 });

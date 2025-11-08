@@ -1,25 +1,25 @@
 namespace Contracts.Auth;
 
 
-public record RegisterUserRequest(
+public record RegisterAuthRequest(
     string Username,
     string Email,
     string Password
 );
 
 
-public record RegisterUserResponse(
+public record RegisterAuthResponse(
     bool Success
 );
 
 
-public record LoginUserRequest(
+public record LoginAuthRequest(
     string Username,
     string Password
 );
 
 
-public record LoginUserResponse(
+public record LoginAuthResponse(
     string AccessToken,
     string RefreshToken
 );
@@ -34,6 +34,12 @@ public record RefreshTokenResponse(
     string RefreshToken
 );
 
+public record DeleteAuthRequest(
+    Guid Id
+);
+public record DeleteAuthResponse(
+    bool Success
+);
 
 public record LogoutRequest(
     string RefreshToken
