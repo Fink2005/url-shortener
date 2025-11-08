@@ -6,7 +6,7 @@ namespace ApiGateway.Controllers;
 
 [ApiController]
 [Route("users")]
-[Tags("User Gateway")]
+[Tags("User Service")]
 public class UserGatewayController : ControllerBase
 {
     private readonly IRequestClient<GetUserRequest> _getUserClient;

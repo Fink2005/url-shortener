@@ -2,10 +2,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AuthService.Domain\AuthService.Domain.csproj" />
+    <ProjectReference Include="..\..\libs\Contracts\Contracts.csproj" />
+    <ProjectReference Include="..\..\libs\Validators\Validators.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="FluentValidation" Version="12.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="9.0.10" />
   </ItemGroup>
 
   <PropertyGroup>

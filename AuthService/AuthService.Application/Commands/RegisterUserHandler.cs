@@ -1,0 +1,49 @@
+using Microsoft.AspNetCore.Identity;
+using AuthService.Domain.Entities;
+using AuthService.Domain.Repositories;
+using AuthService.Domain.Enums;
+using Contracts.Auth;
+using AuthService.Application.Abstractions.Security;
+using FluentValidation;
+
+namespace AuthService.Application.Commands;
+
+public class RegisterUserHandler
+{
+    private readonly IAuthUserRepository _repo;
+    private readonly PasswordHasher<string> _hasher = new();
+    private readonly IJwtTokenService _jwt;
+    private readonly IValidator<RegisterUserRequest> _validator;
+
+    public RegisterUserHandler(
+        IAuthUserRepository repo,
+        IJwtTokenService jwt,
+        IValidator<RegisterUserRequest> validator)
+    {
+        _repo = repo;
+        _jwt = jwt;
+        _validator = validator;
+    }
+
+    public async Task<RegisterUserResponse> Handle(RegisterUserRequest req)
+    {
+        await _validator.ValidateAndThrowAsync(req);
+
+        if (await _repo.FindByUsernameAsync(req.Username) is not null)
+            throw new InvalidOperationException("Username already exists");
+
+        if (await _repo.FindByEmailAsync(req.Email) is not null)
+            throw new InvalidOperationException("Email already registered");
+
+        var hash = _hasher.HashPassword(req.Username, req.Password);
+        var user = new AuthUser(req.Username, req.Email, hash, Role.User);
+
+        var (_, hashRefresh, expireAt) = _jwt.GenerateRefreshToken();
+        user.SetRefreshToken(hashRefresh, expireAt);
+
+        await _repo.AddAsync(user);
+        await _repo.SaveChangesAsync();
+
+        return new RegisterUserResponse(true);
+    }
+}

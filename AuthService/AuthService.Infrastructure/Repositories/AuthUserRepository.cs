@@ -1,0 +1,27 @@
+using Microsoft.EntityFrameworkCore;
+using AuthService.Domain.Entities;
+using AuthService.Domain.Repositories;
+using AuthService.Infrastructure.Data;
+
+namespace AuthService.Infrastructure.Repositories;
+
+public class AuthUserRepository : IAuthUserRepository
+{
+    private readonly AuthDbContext _db;
+    public AuthUserRepository(AuthDbContext db) => _db = db;
+
+    public Task<AuthUser?> FindByUsernameAsync(string username)
+        => _db.AuthUsers.FirstOrDefaultAsync(x => x.Username == username);
+
+    public Task<AuthUser?> FindByEmailAsync(string email)
+        => _db.AuthUsers.FirstOrDefaultAsync(x => x.Email == email);
+
+    public Task<AuthUser?> FindByRefreshHashAsync(string refreshTokenHash)
+        => _db.AuthUsers.FirstOrDefaultAsync(x => x.RefreshTokenHash == refreshTokenHash);
+
+    public Task<AuthUser?> FindByIdAsync(Guid id)
+        => _db.AuthUsers.FirstOrDefaultAsync(x => x.Id == id);
+
+    public async Task AddAsync(AuthUser user) => await _db.AuthUsers.AddAsync(user);
+    public Task SaveChangesAsync() => _db.SaveChangesAsync();
+}

@@ -1,41 +1,95 @@
+using MassTransit;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Validators.Auth;
+using AuthService.Infrastructure.Data;
+using AuthService.Infrastructure.Repositories;
+using AuthService.Domain.Repositories;
+using AuthService.Infrastructure.Services;
+using AuthService.Api.Consumers;
+using AuthService.Application.Commands;
+using AuthService.Application.Abstractions.Security;
+using FluentValidation;
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+// EF Core
+builder.Services.AddDbContext<AuthDbContext>(opt =>
+    opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"),
+        x => x.MigrationsAssembly("AuthService.Infrastructure")));
+
+// DI
+builder.Services.AddScoped<IAuthUserRepository, AuthUserRepository>();
+builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
+builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+
+// Handlers (đăng ký những cái bạn dùng)
+builder.Services.AddScoped<RegisterUserHandler>();
+builder.Services.AddScoped<LoginUserHandler>();
+builder.Services.AddScoped<RefreshTokenHandler>();
+builder.Services.AddScoped<LogoutHandler>();
+builder.Services.AddValidatorsFromAssembly(typeof(RegisterUserValidator).Assembly);
+// MassTransit
+builder.Services.AddMassTransit(x =>
+{
+    x.AddConsumer<RegisterUserConsumer>();
+    x.AddConsumer<LoginUserConsumer>();
+    x.AddConsumer<RefreshTokenConsumer>();
+    x.AddConsumer<LogoutConsumer>();
+
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.Host("localhost", "/", h =>
+        {
+            h.Username("guest");
+            h.Password("guest");
+        });
+
+        cfg.ReceiveEndpoint("auth-service-queue", e =>
+        {
+            e.ConfigureConsumer<RegisterUserConsumer>(context);
+            e.ConfigureConsumer<LoginUserConsumer>(context);
+            e.ConfigureConsumer<RefreshTokenConsumer>(context);
+            e.ConfigureConsumer<LogoutConsumer>(context);
+        });
+    });
+});
+
+// (Tuỳ chọn) bật JWT Bearer để bảo vệ API nội bộ (nếu có controller)
+var jwt = builder.Configuration.GetSection("Jwt");
+var key = Encoding.UTF8.GetBytes(jwt["Secret"]!);
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(o =>
+    {
+        o.TokenValidationParameters = new()
+        {
+            ValidateIssuer = true,
+            ValidIssuer = jwt["Issuer"],
+            ValidateAudience = true,
+            ValidAudience = jwt["Audience"],
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
+        };
+    });
+
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// app.UseAuthentication(); // nếu bạn có controller cần authorize
+// app.UseAuthorization();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
-
+app.MapControllers();
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
