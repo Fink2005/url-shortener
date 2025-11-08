@@ -1,0 +1,103 @@
+# ===============================
+# .NET build outputs
+# ===============================
+bin/
+obj/
+out/
+publish/
+artifacts/
+TestResults/
+
+# ===============================
+# IDE / Editor (VS Code chủ yếu)
+# ===============================
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+.vscode/*.tmp
+.idea/
+.vs/
+
+# ===============================
+# User-specific / misc
+# ===============================
+*.user
+*.rsuser
+*.suo
+*.sln.iml
+
+# ===============================
+# Logs & temp
+# ===============================
+logs/
+*.log
+*.svclog
+tmp/
+temp/
+
+# ===============================
+# NuGet / Packages
+# (monorepo .NET thường dùng PackageReference, nhưng để chắc)
+# ===============================
+packages/
+*.nupkg
+*.snupkg
+project.lock.json
+
+# ===============================
+# Secrets & cấu hình local
+# ===============================
+.env
+.env.*
+!*.example
+secrets.json
+appsettings.Development.json
+appsettings.Local.json
+appsettings.*.local.json
+*.pfx
+*.pem
+*.key
+*.crt
+
+# ===============================
+# Docker (dev overrides thường có secrets)
+# ===============================
+docker-compose.override.yml
+**/Dockerfile.local
+**/docker-compose.dev.yml
+
+# ===============================
+# Coverage / phân tích mã
+# ===============================
+coverage/
+*.coverage
+*.coveragexml
+coverage.info
+.sonarqube/
+.scannerwork/
+
+# ===============================
+# JetBrains / ReSharper (nếu có mở Rider)
+# ===============================
+_ReSharper*/
+*.DotSettings.user
+.ReSharper*/ 
+_ReSharper.Caches/
+
+# ===============================
+# Generated code
+# ===============================
+*.g.cs
+*.generated.cs
+*.AssemblyAttributes.cs
+
+# ===============================
+# SQL/EF tooling (tuỳ môi trường)
+# ===============================
+*.dbmdl
+
+# ===============================
+# Git merge artifacts
+# ===============================
+*.orig

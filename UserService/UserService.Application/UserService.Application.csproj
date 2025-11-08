@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- ✅ Cần cho validator ở handler -->
+    <PackageReference Include="FluentValidation" Version="12.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- ✅ Application cần Domain và Infrastructure để thao tác -->
+    <ProjectReference Include="..\UserService.Domain\UserService.Domain.csproj" />
+    <ProjectReference Include="..\UserService.Infrastructure\UserService.Infrastructure.csproj" />
+
+    <!-- ✅ Quan trọng: Contracts chứa DTO CreateUserRequest/GetUserResponse -->
+    <ProjectReference Include="..\..\libs\Contracts\Contracts.csproj" />
+  </ItemGroup>
+
+</Project>

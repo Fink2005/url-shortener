@@ -1,0 +1,52 @@
+version: "3.9"
+
+services:
+  # 🐰 RabbitMQ - Message Broker
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  # 🐘 PostgreSQL - Database cho UserService
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: users_db
+    ports:
+      - "5444:5444"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # 🔐 AuthService
+  authservice:
+    build: ./AuthService/AuthService.Api
+    container_name: authservice
+    ports:
+      - "5002:8080"
+    depends_on:
+      - rabbitmq
+
+  # 👤 UserService
+  userservice:
+    build: ./UserService/UserService.Api
+    container_name: userservice
+    ports:
+      - "5001:8080"
+    depends_on:
+      - rabbitmq
+      - postgres
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=users_db;Username=postgres;Password=postgres
+
+volumes:
+  postgres_data:
