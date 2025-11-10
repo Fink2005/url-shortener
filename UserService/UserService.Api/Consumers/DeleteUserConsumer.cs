@@ -1,6 +1,6 @@
 using MassTransit;
 using Contracts.Users;
-using UserService.Application.Users.Commands;
+using UserService.Application.Commands;
 
 namespace UserService.Api.Consumers;
 

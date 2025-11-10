@@ -5,13 +5,13 @@ using UserService.Application.Queries;
 
 namespace UserService.Api.Consumers;
 
-public class GetUserConsumer : IConsumer<GetUserRequest>
+public class GetListUserConsumer : IConsumer<GetListUsersRequest>
 {
-    private readonly GetUserHandler _handler;
+    private readonly GetListUserHandler _handler;
 
-    public GetUserConsumer(GetUserHandler handler) => _handler = handler;
+    public GetListUserConsumer(GetListUserHandler handler) => _handler = handler;
 
-    public async Task Consume(ConsumeContext<GetUserRequest> context)
+    public async Task Consume(ConsumeContext<GetListUsersRequest> context)
     {
         var response = await _handler.Handle(context.Message);
         await context.RespondAsync(response);

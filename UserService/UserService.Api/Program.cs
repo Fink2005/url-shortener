@@ -4,8 +4,8 @@ using UserService.Api.Consumers;
 using UserService.Infrastructure.Data;
 using Validators.Users;
 using FluentValidation;
-using UserService.Application.Users.Commands;
-using UserService.Application.Users.Queries;
+using UserService.Application.Commands;
+using UserService.Application.Queries;
 using UserService.Domain.Repositories;
 using UserService.Infrastructure.Repositories;
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +20,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<CreateUserHandler>();
 builder.Services.AddScoped<DeleteUserHandler>();
 builder.Services.AddScoped<GetUserHandler>();
+builder.Services.AddScoped<GetListUserHandler>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateUserRequestValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<GetUserRequestValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<DeleteUserRequestValidator>();
@@ -33,6 +34,7 @@ builder.Services.AddMassTransit(x =>
 {
     // Đăng ký consumer
     x.AddConsumer<GetUserConsumer>();
+    x.AddConsumer<GetListUserConsumer>();
     x.AddConsumer<CreateUserConsumer>();
     x.AddConsumer<DeleteUserConsumer>();
 
@@ -53,6 +55,7 @@ builder.Services.AddMassTransit(x =>
         cfg.ReceiveEndpoint("user-service-queue", e =>
         {
             e.ConfigureConsumer<GetUserConsumer>(context);
+            e.ConfigureConsumer<GetListUserConsumer>(context);
             e.ConfigureConsumer<CreateUserConsumer>(context);
             e.ConfigureConsumer<DeleteUserConsumer>(context);
         });

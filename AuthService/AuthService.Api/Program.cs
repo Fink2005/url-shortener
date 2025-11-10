@@ -63,33 +63,33 @@ builder.Services.AddMassTransit(x =>
 var jwt = builder.Configuration.GetSection("Jwt");
 var key = Encoding.UTF8.GetBytes(jwt["Secret"]!);
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(o =>
-    {
-        o.TokenValidationParameters = new()
-        {
-            ValidateIssuer = true,
-            ValidIssuer = jwt["Issuer"],
-            ValidateAudience = true,
-            ValidAudience = jwt["Audience"],
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(key),
-            ValidateLifetime = true,
-            ClockSkew = TimeSpan.Zero
-        };
-    });
+// builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+//     .AddJwtBearer(o =>
+//     {
+//         o.TokenValidationParameters = new()
+//         {
+//             ValidateIssuer = true,
+//             ValidIssuer = jwt["Issuer"],
+//             ValidateAudience = true,
+//             ValidAudience = jwt["Audience"],
+//             ValidateIssuerSigningKey = true,
+//             IssuerSigningKey = new SymmetricSecurityKey(key),
+//             ValidateLifetime = true,
+//             ClockSkew = TimeSpan.Zero
+//         };
+//     });
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+// builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+// if (app.Environment.IsDevelopment())
+// {
+//     app.UseSwagger();
+//     app.UseSwaggerUI();
+// }
 
 // app.UseAuthentication(); // nếu bạn có controller cần authorize
 // app.UseAuthorization();

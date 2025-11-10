@@ -6,6 +6,8 @@ public interface IUserRepository
 {
     Task<User?> FindByAuthIdAsync(Guid authId);
     Task<User?> FindByUserIdAsync(Guid userId);
+    Task<List<User>> GetAllAsync();
+
     Task AddAsync(User user);
     Task<bool> DeleteAsync(Guid userId);
     Task SaveChangesAsync();

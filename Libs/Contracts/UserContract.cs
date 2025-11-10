@@ -28,6 +28,13 @@ public record GetUserResponse
     }
 }
 
+
+
+
+//  Get list users 
+public record GetListUsersRequest();
+public record GetListUsersResponse(List<UserDto> Users);
+public record UserDto(Guid Id, Guid AuthId, string Username, string Email);
 // ===== CREATE USER =====
 public record CreateUserRequest
 {

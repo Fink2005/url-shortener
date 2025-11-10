@@ -2,7 +2,7 @@ namespace UserService.Api.Consumers;
 
 using MassTransit;
 using Contracts.Users;
-using UserService.Application.Users.Commands;
+using UserService.Application.Commands;
 
 public class CreateUserConsumer : IConsumer<CreateUserRequest>
 {

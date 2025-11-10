@@ -4,7 +4,7 @@ using UserService.Domain.Repositories;
 using UserService.Infrastructure.Repositories;
 using Contracts.Users;
 
-namespace UserService.Application.Users.Commands;
+namespace UserService.Application.Commands;
 
 public class DeleteUserHandler
 {

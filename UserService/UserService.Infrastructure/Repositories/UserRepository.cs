@@ -27,6 +27,11 @@ public class UserRepository : IUserRepository
         await _db.Users.AddAsync(user);
     }
 
+    public async Task<List<User>> GetAllAsync()
+    {
+        return await _db.Users.ToListAsync();
+    }
+
     public async Task<bool> DeleteAsync(Guid userId)
     {
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);

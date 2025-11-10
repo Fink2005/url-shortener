@@ -12,16 +12,27 @@ public class UserGatewayController : ControllerBase
     private readonly IRequestClient<GetUserRequest> _getUserClient;
     private readonly IRequestClient<CreateUserRequest> _createUserClient;
     private readonly IRequestClient<DeleteUserRequest> _deleteUserClient;
+    private readonly IRequestClient<GetListUsersRequest> _getListUserClient;
 
     public UserGatewayController(
         IRequestClient<GetUserRequest> getUserClient,
         IRequestClient<CreateUserRequest> createUserClient,
-        IRequestClient<DeleteUserRequest> deleteUserClient
+        IRequestClient<DeleteUserRequest> deleteUserClient,
+        IRequestClient<GetListUsersRequest> getListUserClient
+
         )
     {
         _getUserClient = getUserClient;
         _createUserClient = createUserClient;
         _deleteUserClient = deleteUserClient;
+        _getListUserClient = getListUserClient;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetListUsers()
+    {
+        var response = await _getListUserClient.GetResponse<GetListUsersResponse>(new GetListUsersRequest());
+        return Ok(response.Message);
     }
 
     [HttpGet("{id}")]

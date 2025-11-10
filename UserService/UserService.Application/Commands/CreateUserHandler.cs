@@ -3,7 +3,7 @@ using UserService.Domain.Entities;
 using UserService.Domain.Repositories;
 using Contracts.Users;
 
-namespace UserService.Application.Users.Commands;
+namespace UserService.Application.Commands;
 
 public class CreateUserHandler
 {

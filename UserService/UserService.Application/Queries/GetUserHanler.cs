@@ -4,7 +4,7 @@ using Contracts.Users;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
-namespace UserService.Application.Users.Queries;
+namespace UserService.Application.Queries;
 
 public class GetUserHandler
 {
