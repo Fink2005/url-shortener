@@ -26,7 +26,7 @@ public class SendConfirmationEmailConsumer : IConsumer<SendConfirmationEmailRequ
         {
             // Generate token (6 digits)
             var token = new Random().Next(100000, 999999).ToString();
-            
+
             // Save token to Redis (5 minutes)
             await _tokenService.SaveTokenAsync(message.Email, token, 5);
             Console.WriteLine($"[SendConfirmationEmailConsumer] Token saved to Redis: {message.Email}");

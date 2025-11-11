@@ -81,7 +81,7 @@ public class MailGatewayController : ControllerBase
         {
             var request = new CheckEmailTokenRequest(email);
             var response = await _checkClient.GetResponse<CheckEmailTokenResponse>(request);
-            
+
             if (response.Message.Success)
             {
                 return Ok(response.Message);

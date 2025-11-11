@@ -39,14 +39,14 @@ public class ResendMailSender : IMailSender
         try
         {
             var response = await _httpClient.PostAsJsonAsync("https://api.resend.com/emails", payload);
-            
+
             if (!response.IsSuccessStatusCode)
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
                 Console.WriteLine($"✗ Resend API error ({response.StatusCode}): {errorContent}");
                 response.EnsureSuccessStatusCode();
             }
-            
+
             Console.WriteLine($"✓ Email sent to {request.To}");
         }
         catch (Exception ex)
