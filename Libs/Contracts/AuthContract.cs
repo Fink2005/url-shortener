@@ -1,5 +1,6 @@
-namespace Contracts.Auth;
+using System;
 
+namespace Contracts.Auth;
 
 public record RegisterAuthRequest(
     string Username,
@@ -7,11 +8,9 @@ public record RegisterAuthRequest(
     string Password
 );
 
-
 public record RegisterAuthResponse(
     bool Success
 );
-
 
 public record LoginAuthRequest(
     string Username,

@@ -22,8 +22,8 @@
 <ItemGroup>
   <ProjectReference Include="..\UrlService.Application\UrlService.Application.csproj" />
   <ProjectReference Include="..\UrlService.Infrastructure\UrlService.Infrastructure.csproj" />
-  <ProjectReference Include="..\..\libs\Contracts\Contracts.csproj" />
-  <ProjectReference Include="..\..\libs\Validators\Validators.csproj" />
+  <ProjectReference Include="..\..\Libs\Contracts\Contracts.csproj" />
+  <ProjectReference Include="..\..\Libs\Validators\Validators.csproj" />
 </ItemGroup>
 
 

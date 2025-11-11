@@ -39,22 +39,26 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<RefreshTokenConsumer>();
     x.AddConsumer<LogoutConsumer>();
     x.AddConsumer<DeleteAuthConsumer>();
+    x.AddConsumer<CreateAuthUserConsumer>();
+    x.AddConsumer<AssignDefaultRoleConsumer>();
 
     x.UsingRabbitMq((context, cfg) =>
     {
-        cfg.Host("localhost", "/", h =>
+        cfg.Host("rabbitmq", "/", h =>
         {
             h.Username("guest");
             h.Password("guest");
         });
 
-        cfg.ReceiveEndpoint("auth-service-queue", e =>
+        cfg.ReceiveEndpoint("auth-service", e =>
         {
             e.ConfigureConsumer<RegisterAuthConsumer>(context);
             e.ConfigureConsumer<LoginAuthConsumer>(context);
             e.ConfigureConsumer<RefreshTokenConsumer>(context);
             e.ConfigureConsumer<LogoutConsumer>(context);
             e.ConfigureConsumer<DeleteAuthConsumer>(context);
+            e.ConfigureConsumer<CreateAuthUserConsumer>(context);
+            e.ConfigureConsumer<AssignDefaultRoleConsumer>(context);
         });
     });
 });
@@ -81,15 +85,15 @@ var key = Encoding.UTF8.GetBytes(jwt["Secret"]!);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-// builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// if (app.Environment.IsDevelopment())
-// {
-//     app.UseSwagger();
-//     app.UseSwaggerUI();
-// }
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 // app.UseAuthentication(); // nếu bạn có controller cần authorize
 // app.UseAuthorization();

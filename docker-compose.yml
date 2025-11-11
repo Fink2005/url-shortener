@@ -1,52 +1,112 @@
-version: "3.9"
-
 services:
-  # 🐰 RabbitMQ - Message Broker
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
+    restart: always
     ports:
       - "5672:5672"
       - "15672:15672"
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  # 🐘 PostgreSQL - Database cho UserService
-  postgres:
-    image: postgres:16
-    container_name: postgres
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: users_db
-    ports:
-      - "5444:5444"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-  # 🔐 AuthService
   authservice:
-    build: ./AuthService/AuthService.Api
+    build:
+      context: .
+      dockerfile: AuthService/AuthService.Api/Dockerfile
     container_name: authservice
+    restart: always
     ports:
       - "5002:8080"
-    depends_on:
-      - rabbitmq
-
-  # 👤 UserService
-  userservice:
-    build: ./UserService/UserService.Api
-    container_name: userservice
-    ports:
-      - "5001:8080"
-    depends_on:
-      - rabbitmq
-      - postgres
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=users_db;Username=postgres;Password=postgres
+      - ConnectionStrings__DefaultConnection=Host=url-shortener-instance.cpicai0qavde.ap-southeast-1.rds.amazonaws.com;Port=5432;Database=auth_db;Username=postgres;Password=urlShortener123
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
 
-volumes:
-  postgres_data:
+  userservice:
+    build:
+      context: .
+      dockerfile: UserService/UserService.Api/Dockerfile
+    container_name: userservice
+    restart: always
+    ports:
+      - "5001:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=url-shortener-instance.cpicai0qavde.ap-southeast-1.rds.amazonaws.com;Port=5432;Database=user_db;Username=postgres;Password=urlShortener123
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  urlservice:
+    build:
+      context: .
+      dockerfile: UrlService/UrlService.Api/Dockerfile
+    container_name: urlservice
+    restart: always
+    ports:
+      - "5003:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=url-shortener-instance.cpicai0qavde.ap-southeast-1.rds.amazonaws.com;Port=5432;Database=url_db;Username=postgres;Password=urlShortener123
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  mailservice:
+    build:
+      context: .
+      dockerfile: MailService/MailService.Api/Dockerfile
+    container_name: mailservice
+    restart: always
+    ports:
+      - "5004:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Resend__ApiKey=re_XD7QzvX6_GfF6sbmYjdEXKhGFrNGa76TN
+      - Resend__FromEmail=onboarding@resend.dev
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  sagaservice:
+    build:
+      context: .
+      dockerfile: SagaService/SagaService.Api/Dockerfile
+    container_name: sagaservice
+    restart: always
+    ports:
+      - "5005:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=url-shortener-instance.cpicai0qavde.ap-southeast-1.rds.amazonaws.com;Port=5432;Database=saga_db;Username=postgres;Password=urlShortener123
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  apigateway:
+    build:
+      context: .
+      dockerfile: ApiGateway/Dockerfile
+    container_name: apigateway
+    restart: always
+    ports:
+      - "5050:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - authservice
+      - userservice
+      - urlservice
+      - sagaservice
+
+networks:
+  default:
+    name: url-shortener-network

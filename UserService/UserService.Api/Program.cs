@@ -37,6 +37,7 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<GetListUserConsumer>();
     x.AddConsumer<CreateUserConsumer>();
     x.AddConsumer<DeleteUserConsumer>();
+    x.AddConsumer<CreateUserFromSagaConsumer>();
 
 
 
@@ -45,19 +46,20 @@ builder.Services.AddMassTransit(x =>
     // ========================
     x.UsingRabbitMq((context, cfg) =>
     {
-        cfg.Host("localhost", "/", h =>
+        cfg.Host("rabbitmq", "/", h =>
         {
             h.Username("guest");
             h.Password("guest");
         });
 
 
-        cfg.ReceiveEndpoint("user-service-queue", e =>
+        cfg.ReceiveEndpoint("user-service", e =>
         {
             e.ConfigureConsumer<GetUserConsumer>(context);
             e.ConfigureConsumer<GetListUserConsumer>(context);
             e.ConfigureConsumer<CreateUserConsumer>(context);
             e.ConfigureConsumer<DeleteUserConsumer>(context);
+            e.ConfigureConsumer<CreateUserFromSagaConsumer>(context);
         });
     });
 });

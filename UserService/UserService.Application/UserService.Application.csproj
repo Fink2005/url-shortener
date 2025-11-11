@@ -17,7 +17,7 @@
     <ProjectReference Include="..\UserService.Infrastructure\UserService.Infrastructure.csproj" />
 
     <!-- ✅ Quan trọng: Contracts chứa DTO CreateUserRequest/GetUserResponse -->
-    <ProjectReference Include="..\..\libs\Contracts\Contracts.csproj" />
+    <ProjectReference Include="..\..\Libs\Contracts\Contracts.csproj" />
   </ItemGroup>
 
 </Project>

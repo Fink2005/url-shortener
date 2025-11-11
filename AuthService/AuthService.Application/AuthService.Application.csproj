@@ -2,12 +2,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AuthService.Domain\AuthService.Domain.csproj" />
-    <ProjectReference Include="..\..\libs\Contracts\Contracts.csproj" />
-    <ProjectReference Include="..\..\libs\Validators\Validators.csproj" />
+    <ProjectReference Include="..\..\Libs\Contracts\Contracts.csproj" />
+    <ProjectReference Include="..\..\Libs\Validators\Validators.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="FluentValidation" Version="12.1.0" />
+    <PackageReference Include="MassTransit" Version="8.5.5" />
     <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="9.0.10" />
   </ItemGroup>
 

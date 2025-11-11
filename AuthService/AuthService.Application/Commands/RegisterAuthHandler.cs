@@ -5,6 +5,7 @@ using AuthService.Domain.Enums;
 using Contracts.Auth;
 using AuthService.Application.Abstractions.Security;
 using FluentValidation;
+using MassTransit;
 
 namespace AuthService.Application.Commands;
 
@@ -14,15 +15,18 @@ public class RegisterAuthHandler
     private readonly PasswordHasher<string> _hasher = new();
     private readonly IJwtTokenService _jwt;
     private readonly IValidator<RegisterAuthRequest> _validator;
+    private readonly IPublishEndpoint _publishEndpoint;
 
     public RegisterAuthHandler(
         IAuthUserRepository repo,
         IJwtTokenService jwt,
-        IValidator<RegisterAuthRequest> validator)
+        IValidator<RegisterAuthRequest> validator,
+        IPublishEndpoint publishEndpoint)
     {
         _repo = repo;
         _jwt = jwt;
         _validator = validator;
+        _publishEndpoint = publishEndpoint;
     }
 
     public async Task<RegisterAuthResponse> Handle(RegisterAuthRequest req)
@@ -43,6 +47,9 @@ public class RegisterAuthHandler
 
         await _repo.AddAsync(user);
         await _repo.SaveChangesAsync();
+
+        // 🔥 Publish event để trigger saga
+        await _publishEndpoint.Publish(req);
 
         return new RegisterAuthResponse(true);
     }

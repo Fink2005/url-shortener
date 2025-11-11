@@ -3,9 +3,10 @@ using SagaService.Domain.States;
 
 namespace SagaService.Infrastructure.Data;
 
-public class SagaStateDbContext
-    : MassTransit.EntityFrameworkCoreIntegration.SagaDbContext<UserOnboardingState, UserOnboardingStateMap>
+public class SagaStateDbContext : DbContext
 {
+    public DbSet<UserOnboardingState> UserOnboardingStates { get; set; }
+
     public SagaStateDbContext(DbContextOptions<SagaStateDbContext> options)
         : base(options)
     {
@@ -13,7 +14,9 @@ public class SagaStateDbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // MassTransit tự map dựa trên UserOnboardingStateMap
         base.OnModelCreating(modelBuilder);
+
+        // Configure UserOnboardingState mapping
+        modelBuilder.ApplyConfiguration(new UserOnboardingStateMap());
     }
 }
