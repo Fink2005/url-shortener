@@ -17,13 +17,20 @@ public class RegisterRequestedConsumer : IConsumer<RegisterRequestedEvent>
     {
         var msg = context.Message;
 
-        Console.WriteLine($"📬 Saga: Received RegisterRequestedEvent for {msg.Email}");
+        Console.WriteLine($"📬 ========================================");
+        Console.WriteLine($"📬 [SagaService] Received RegisterRequestedEvent!");
+        Console.WriteLine($"📬 [SagaService] Email: {msg.Email}");
+        Console.WriteLine($"📬 [SagaService] Username: {msg.Username}");
+        Console.WriteLine($"📬 ========================================");
+
+        Console.WriteLine($"📤 [SagaService] Requesting MailService to send confirmation email...");
 
         // Gửi mail xác nhận
         await _mailClient.GetResponse<SendConfirmationEmailResponse>(
             new SendConfirmationEmailRequest(msg.Email)
         );
 
-        Console.WriteLine($"📨 Saga: Sent confirmation email for {msg.Email}");
+        Console.WriteLine($"✅ [SagaService] Confirmation email sent successfully for {msg.Email}");
+        Console.WriteLine($"========================================");
     }
 }

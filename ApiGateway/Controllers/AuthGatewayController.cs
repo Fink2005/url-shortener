@@ -1,6 +1,9 @@
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Contracts.Auth;
+using Contracts.Saga;
+using Contracts.Saga.Auth;
 
 namespace ApiGateway.Controllers;
 
@@ -9,34 +12,102 @@ namespace ApiGateway.Controllers;
 [Tags("Auth Service")]
 public class AuthGatewayController : ControllerBase
 {
-    private readonly IRequestClient<RegisterAuthRequest> _registerClient;
     private readonly IRequestClient<LoginAuthRequest> _loginClient;
     private readonly IRequestClient<RefreshTokenRequest> _refreshClient;
     private readonly IRequestClient<LogoutRequest> _logoutClient;
-    private readonly IRequestClient<DeleteAuthRequest> _deleteClient;
+    private readonly IRequestClient<RegisterRequestedEvent> _registerClient;
+    private readonly IRequestClient<VerifyEmailRequestedEvent> _verifyEmailClient;
 
     public AuthGatewayController(
-        IRequestClient<RegisterAuthRequest> registerClient,
         IRequestClient<LoginAuthRequest> loginClient,
         IRequestClient<RefreshTokenRequest> refreshClient,
         IRequestClient<LogoutRequest> logoutClient,
-        IRequestClient<DeleteAuthRequest> deleteClient)
+        IRequestClient<RegisterRequestedEvent> registerClient,
+        IRequestClient<VerifyEmailRequestedEvent> verifyEmailClient)
     {
-        _registerClient = registerClient;
         _loginClient = loginClient;
         _refreshClient = refreshClient;
         _logoutClient = logoutClient;
-        _deleteClient = deleteClient;
+        _registerClient = registerClient;
+        _verifyEmailClient = verifyEmailClient;
     }
 
     // =========================
     // POST /auth/register
     // =========================
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterAuthRequest request)
+    public async Task<IActionResult> Register([FromBody] RegisterRequestedEvent request)
     {
-        var response = await _registerClient.GetResponse<RegisterAuthResponse>(request);
-        return Ok(response.Message);
+        try
+        {
+            Console.WriteLine($"📬 [Gateway] Received register request for {request.Email}");
+
+            var response = await _registerClient.GetResponse<RegisterRequestedEvent>(request);
+
+            Console.WriteLine($"✅ [Gateway] Registration completed for {request.Email}");
+
+            return Ok(response.Message);
+        }
+        catch (RequestTimeoutException)
+        {
+            Console.WriteLine($"⏱️ [Gateway] Register request timeout");
+            return StatusCode(408, new
+            {
+                success = false,
+                message = "Request timeout"
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ [Gateway] Register error: {ex.Message}");
+            return StatusCode(500, new
+            {
+                success = false,
+                message = ex.Message
+            });
+        }
+    }
+
+    // =========================
+    // POST /auth/verify-email
+    // =========================
+    [HttpPost("verify-email")]
+    public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailRequestDto request)
+    {
+        try
+        {
+            Console.WriteLine($"📬 [Gateway] Received verify email request for {request.Email}");
+
+            var response = await _verifyEmailClient.GetResponse<VerifyEmailRequestedEvent>(
+                new VerifyEmailRequestedEvent(request.Email, request.Token)
+            );
+
+            Console.WriteLine($"✅ [Gateway] Email verification completed for {request.Email}");
+
+            return Ok(new
+            {
+                success = true,
+                message = "Email verified successfully. User profile is being created."
+            });
+        }
+        catch (RequestTimeoutException)
+        {
+            Console.WriteLine($"⏱️ [Gateway] Email verification timeout");
+            return StatusCode(408, new
+            {
+                success = false,
+                message = "Request timeout"
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ [Gateway] Email verification error: {ex.Message}");
+            return StatusCode(500, new
+            {
+                success = false,
+                message = ex.Message
+            });
+        }
     }
 
     // =========================
@@ -45,8 +116,35 @@ public class AuthGatewayController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginAuthRequest request)
     {
-        var response = await _loginClient.GetResponse<LoginAuthResponse>(request);
-        return Ok(response.Message);
+        try
+        {
+            var response = await _loginClient.GetResponse<LoginAuthResponse>(request);
+            return Ok(response.Message);
+        }
+        catch (RequestFaultException faultEx)
+        {
+            // MassTransit wraps service errors in RequestFaultException
+            var fault = faultEx.Fault;
+            if (fault.Exceptions != null && fault.Exceptions.Any())
+            {
+                var firstException = fault.Exceptions.First();
+                var message = firstException.Message;
+
+                // Check if it's an UnauthorizedAccessException
+                if (firstException.ExceptionType?.Contains("UnauthorizedAccessException") == true)
+                {
+                    return Unauthorized(new { message });
+                }
+
+                // Check if it's a ValidationException
+                if (firstException.ExceptionType?.Contains("ValidationException") == true)
+                {
+                    return BadRequest(new { message });
+                }
+            }
+
+            return StatusCode(500, new { message = "An error occurred while processing your request" });
+        }
     }
 
     // =========================
@@ -63,16 +161,10 @@ public class AuthGatewayController : ControllerBase
     // POST /auth/logout
     // =========================
     [HttpPost("logout")]
+    [Authorize(Policy = "Authenticated")]
     public async Task<IActionResult> Logout([FromBody] LogoutRequest request)
     {
         var response = await _logoutClient.GetResponse<LogoutResponse>(request);
-        return Ok(response.Message);
-    }
-
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteUser(Guid id)
-    {
-        var response = await _deleteClient.GetResponse<DeleteAuthResponse>(new DeleteAuthRequest(id));
         return Ok(response.Message);
     }
 

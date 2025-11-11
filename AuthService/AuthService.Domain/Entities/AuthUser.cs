@@ -46,4 +46,12 @@ public class AuthUser
     }
 
     public void PromoteToAdmin() => Role = Role.Admin;
+
+    public void VerifyEmail()
+    {
+        if (IsEmailVerified)
+            throw new InvalidOperationException("Email is already verified");
+
+        IsEmailVerified = true;
+    }
 }

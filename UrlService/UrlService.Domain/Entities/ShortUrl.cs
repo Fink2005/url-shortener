@@ -3,14 +3,15 @@ namespace UrlService.Domain.Entities;
 public class ShortUrl
 {
     public Guid Id { get; private set; }
-    public string OriginalUrl { get; private set; }
-    public string ShortCode { get; private set; }
+    public string OriginalUrl { get; private set; } = string.Empty;
+    public string ShortCode { get; private set; } = string.Empty;
     public DateTime CreatedAt { get; private set; }
     public DateTime? ExpireAt { get; private set; }
     public bool IsActive { get; private set; }
+    public Guid? UserId { get; private set; } // User who created this URL
 
     // ✅ Constructor chính: nhận OriginalUrl và ShortCode
-    public ShortUrl(string originalUrl, string shortCode)
+    public ShortUrl(string originalUrl, string shortCode, Guid? userId = null)
     {
         Id = Guid.NewGuid();
         OriginalUrl = originalUrl;
@@ -20,6 +21,7 @@ public class ShortUrl
         CreatedAt = DateTime.UtcNow;
         ExpireAt = DateTime.UtcNow.AddDays(7); // Ví dụ: mặc định 7 ngày
         IsActive = true;
+        UserId = userId;
     }
 
     // ✅ Dành cho EF Core

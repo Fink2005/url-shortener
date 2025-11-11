@@ -38,6 +38,7 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<SendConfirmationEmailConsumer>();
     x.AddConsumer<VerifyEmailConsumer>();
     x.AddConsumer<CheckEmailTokenConsumer>();
+    x.AddConsumer<VerifyMailSagaConsumer>();
     x.UsingRabbitMq((context, cfg) =>
     {
         var rabbitmqHost = builder.Configuration["RabbitMq:Host"] ?? "localhost";
@@ -53,6 +54,7 @@ builder.Services.AddMassTransit(x =>
             e.ConfigureConsumer<SendConfirmationEmailConsumer>(context);
             e.ConfigureConsumer<VerifyEmailConsumer>(context);
             e.ConfigureConsumer<CheckEmailTokenConsumer>(context);
+            e.ConfigureConsumer<VerifyMailSagaConsumer>(context);
         });
     });
 });

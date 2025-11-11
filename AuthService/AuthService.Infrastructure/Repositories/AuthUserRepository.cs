@@ -35,5 +35,18 @@ public class AuthUserRepository : IAuthUserRepository
 
 
     public async Task AddAsync(AuthUser user) => await _db.AuthUsers.AddAsync(user);
+
+    public async Task UpdateAsync(AuthUser user)
+    {
+        _db.AuthUsers.Update(user);
+        await _db.SaveChangesAsync();
+    }
+
+    public Task<AuthUser?> GetByEmailAsync(string email)
+        => _db.AuthUsers.FirstOrDefaultAsync(x => x.Email == email);
+
+    public Task<List<AuthUser>> GetAllAsync()
+        => _db.AuthUsers.ToListAsync();
+
     public Task SaveChangesAsync() => _db.SaveChangesAsync();
 }

@@ -22,7 +22,7 @@ public class CreateShortUrlHandler
         await _validator.ValidateAndThrowAsync(request);
 
         var shortCode = new ShortCode();
-        var entity = new ShortUrl(request.OriginalUrl, shortCode.Value);
+        var entity = new ShortUrl(request.OriginalUrl, shortCode.Value, request.UserId);
 
         await _repo.AddAsync(entity);
         await _repo.SaveChangesAsync();

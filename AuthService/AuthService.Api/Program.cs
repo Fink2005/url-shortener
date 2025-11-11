@@ -31,6 +31,9 @@ builder.Services.AddScoped<LoginAuthHandler>();
 builder.Services.AddScoped<RefreshTokenHandler>();
 builder.Services.AddScoped<DeleteAuthHandler>();
 builder.Services.AddScoped<LogoutHandler>();
+builder.Services.AddScoped<VerifyEmailAuthHandler>();
+builder.Services.AddScoped<GetAllAuthUsersHandler>();
+builder.Services.AddScoped<PromoteToAdminHandler>();
 builder.Services.AddValidatorsFromAssembly(typeof(RegisterAuthValidator).Assembly);
 // MassTransit
 builder.Services.AddMassTransit(x =>
@@ -41,7 +44,11 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<LogoutConsumer>();
     x.AddConsumer<DeleteAuthConsumer>();
     x.AddConsumer<RegisterAuthSagaConsumer>();
+    x.AddConsumer<VerifyAuthMailSagaConsumer>();
     x.AddConsumer<AssignDefaultRoleConsumer>();
+    x.AddConsumer<GetAllAuthUsersConsumer>();
+    x.AddConsumer<PromoteToAdminConsumer>();
+    x.AddConsumer<GetAuthByIdConsumer>();
 
     x.UsingRabbitMq((context, cfg) =>
     {
@@ -60,7 +67,10 @@ builder.Services.AddMassTransit(x =>
             e.ConfigureConsumer<LogoutConsumer>(context);
             e.ConfigureConsumer<DeleteAuthConsumer>(context);
             e.ConfigureConsumer<RegisterAuthSagaConsumer>(context);
+            e.ConfigureConsumer<VerifyAuthMailSagaConsumer>(context);
             e.ConfigureConsumer<AssignDefaultRoleConsumer>(context);
+            e.ConfigureConsumer<GetAllAuthUsersConsumer>(context);
+            e.ConfigureConsumer<PromoteToAdminConsumer>(context);
         });
     });
 });

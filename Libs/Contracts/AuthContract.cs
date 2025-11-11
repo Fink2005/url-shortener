@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Contracts.Auth;
 
@@ -47,4 +48,32 @@ public record LogoutRequest(
 
 public record LogoutResponse(
     bool Success
+);
+
+public record GetAllAuthUsersRequest();
+
+public record GetAllAuthUsersResponse(List<AuthUserDto> Users);
+
+public class AuthUserDto
+{
+    public Guid Id { get; set; }
+    public string Username { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Role { get; set; } = string.Empty;
+    public bool IsEmailVerified { get; set; }
+}
+
+public record PromoteToAdminRequest(Guid UserId);
+
+public record PromoteToAdminResponse(bool Success, string Message);
+
+// Get Auth by Id for saga
+public record GetAuthByIdRequest(Guid Id);
+
+public record GetAuthByIdResponse(
+    Guid Id,
+    string Username,
+    string Email,
+    string Role,
+    bool IsEmailVerified
 );

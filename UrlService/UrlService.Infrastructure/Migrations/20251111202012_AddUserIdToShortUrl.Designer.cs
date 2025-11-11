@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using UrlService.Infrastructure.Data;
@@ -11,9 +12,11 @@ using UrlService.Infrastructure.Data;
 namespace UrlService.Infrastructure.Migrations
 {
     [DbContext(typeof(UrlDbContext))]
-    partial class UrlDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251111202012_AddUserIdToShortUrl")]
+    partial class AddUserIdToShortUrl
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

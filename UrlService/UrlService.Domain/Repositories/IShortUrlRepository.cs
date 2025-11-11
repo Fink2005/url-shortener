@@ -9,6 +9,7 @@ public interface IShortUrlRepository
     Task<ShortUrl?> FindByCodeAsync(ShortCode code, CancellationToken ct = default);
     Task<bool> CodeExistsAsync(ShortCode code, CancellationToken ct = default);
     Task<List<ShortUrl>> GetAllAsync(CancellationToken ct = default);
+    Task<List<ShortUrl>> GetAllByUserIdAsync(Guid userId, CancellationToken ct = default);
     Task<ShortUrl?> FindByIdAsync(Guid id, CancellationToken ct = default);
     Task<ShortUrl?> FindExpiredDateAsync(DateTime expireAt, CancellationToken ct = default);
     Task<ShortUrl?> DeleteByIdAsync(Guid id, CancellationToken ct = default);

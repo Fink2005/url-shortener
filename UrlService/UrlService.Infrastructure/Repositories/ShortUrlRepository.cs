@@ -21,6 +21,14 @@ public class ShortUrlRepository : IShortUrlRepository
         return await _db.ShortUrls.ToListAsync(ct);
     }
 
+    public async Task<List<ShortUrl>> GetAllByUserIdAsync(Guid userId, CancellationToken ct = default)
+    {
+        return await _db.ShortUrls
+            .Where(x => x.UserId == userId)
+            .OrderByDescending(x => x.CreatedAt)
+            .ToListAsync(ct);
+    }
+
     public async Task<ShortUrl?> FindByIdAsync(Guid id, CancellationToken ct = default)
     {
         return await _db.ShortUrls.FirstOrDefaultAsync(x => x.Id == id, ct);

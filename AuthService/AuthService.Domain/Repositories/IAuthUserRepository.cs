@@ -10,5 +10,8 @@ public interface IAuthUserRepository
     Task<AuthUser?> FindByIdAsync(Guid id);
     Task<AuthUser?> DeleteByIdAsync(Guid id);
     Task AddAsync(AuthUser user);
+    Task UpdateAsync(AuthUser user);
+    Task<AuthUser?> GetByEmailAsync(string email);
+    Task<List<AuthUser>> GetAllAsync();
     Task SaveChangesAsync();
 }

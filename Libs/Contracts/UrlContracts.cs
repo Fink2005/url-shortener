@@ -6,11 +6,14 @@ namespace Contracts.Url;
 public record CreateShortUrlRequest
 {
     public string OriginalUrl { get; init; } = string.Empty;
+    public Guid? UserId { get; init; } // User who created this URL
+
     public CreateShortUrlRequest() { }
 
-    public CreateShortUrlRequest(string originalUrl)
+    public CreateShortUrlRequest(string originalUrl, Guid? userId = null)
     {
         OriginalUrl = originalUrl;
+        UserId = userId;
     }
 }
 
@@ -57,3 +60,19 @@ public record DisableShortUrlResponse(bool Success);
 // ===== DELETE SHORT URL =====
 public record DeleteShortUrlRequest(Guid Id);
 public record DeleteShortUrlResponse(bool Success);
+
+
+// ===== GET URLS BY USER =====
+public record GetUrlsByUserRequest(Guid UserId);
+public record GetUrlsByUserResponse(Guid UserId, List<UrlDto> Urls);
+
+public class UrlDto
+{
+    public Guid Id { get; set; }
+    public string ShortCode { get; set; } = string.Empty;
+    public string ShortUrl { get; set; } = string.Empty;
+    public string OriginalUrl { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; }
+    public DateTime? ExpireAt { get; set; }
+    public bool IsActive { get; set; }
+}

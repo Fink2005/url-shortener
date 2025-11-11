@@ -35,6 +35,7 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<DisableShortUrlConsumer>();
     x.AddConsumer<GetListShortUrlConsumer>();
     x.AddConsumer<DeleteShortUrlConsumer>();
+    x.AddConsumer<GetUrlsByUserConsumer>();
 
     x.UsingRabbitMq((context, cfg) =>
     {

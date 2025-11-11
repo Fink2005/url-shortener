@@ -16,6 +16,7 @@ public class UrlDbContext : DbContext
             entity.HasKey(e => e.Id);
             entity.Property(e => e.OriginalUrl).IsRequired();
             entity.Property(e => e.ShortCode).IsRequired().HasMaxLength(10);
+            entity.Property(e => e.UserId).IsRequired(false); // Nullable UserId
             entity.HasIndex(e => e.ShortCode).IsUnique();
         });
     }

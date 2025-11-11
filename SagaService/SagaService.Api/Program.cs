@@ -1,35 +1,30 @@
 using MassTransit;
-using MassTransit.EntityFrameworkCoreIntegration;
-using Microsoft.EntityFrameworkCore;
-using SagaService.Infrastructure.Data;
 using SagaService.Domain.States;
+using SagaService.Api.Consumers;
+using Contracts.Mail;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ĐK DbContext cho EF/Migrations
-builder.Services.AddDbContext<SagaStateDbContext>(opt =>
-    opt.UseNpgsql(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        npgsql => npgsql.MigrationsAssembly("SagaService.Infrastructure")
-    )
-);
-
 builder.Services.AddMassTransit(x =>
 {
+    // Use InMemory repository for all sagas (no database needed)
     x.AddSagaStateMachine<UserOnboardingStateMachine, UserOnboardingState>()
-        .EntityFrameworkRepository(r =>
-        {
-            r.ExistingDbContext<SagaStateDbContext>();
-            r.ConcurrencyMode = ConcurrencyMode.Pessimistic;
-            r.LockStatementProvider = new PostgresLockStatementProvider();
-        });
+        .InMemoryRepository();
 
     // Register Consumers
-    x.AddConsumer<RegisterSagaConsumer>();
+    x.AddConsumer<RegisterRequestedConsumer>();
+    x.AddConsumer<GetUserWithUrlsConsumer>();
+    x.AddConsumer<GetAllUsersWithUrlsConsumer>();
+    x.AddConsumer<DeleteUserSagaConsumer>();
 
     // Register Request Clients
-    x.AddRequestClient<SendConfirmationEmailCommand>(TimeSpan.FromSeconds(30));
-    x.AddRequestClient<VerifyAuthUserEmailCommand>(TimeSpan.FromSeconds(30));
+    x.AddRequestClient<SendConfirmationEmailRequest>(TimeSpan.FromSeconds(30));
+    x.AddRequestClient<Contracts.Users.GetUserRequest>(TimeSpan.FromSeconds(10));
+    x.AddRequestClient<Contracts.Users.GetListUsersRequest>(TimeSpan.FromSeconds(30));
+    x.AddRequestClient<Contracts.Users.DeleteUserRequest>(TimeSpan.FromSeconds(10));
+    x.AddRequestClient<Contracts.Auth.GetAuthByIdRequest>(TimeSpan.FromSeconds(10));
+    x.AddRequestClient<Contracts.Auth.DeleteAuthRequest>(TimeSpan.FromSeconds(10));
+    x.AddRequestClient<Contracts.Url.GetUrlsByUserRequest>(TimeSpan.FromSeconds(10));
 
     x.UsingRabbitMq((context, cfg) =>
     {
