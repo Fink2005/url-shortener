@@ -81,3 +81,7 @@ public record DeleteUserRequest
 
 
 public record DeleteUserResponse(bool Success);
+
+// ===== GET USER BY AUTH ID =====
+public record GetUserByAuthIdRequest(Guid AuthId);
+public record GetUserByAuthIdResponse(Guid UserId, Guid AuthId, string Username, string Email);

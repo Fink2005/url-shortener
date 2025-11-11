@@ -34,6 +34,7 @@ builder.Services.AddMassTransit(x =>
 {
     // Đăng ký consumer
     x.AddConsumer<GetUserConsumer>();
+    x.AddConsumer<GetUserByAuthIdConsumer>();
     x.AddConsumer<GetListUserConsumer>();
     x.AddConsumer<CreateUserConsumer>();
     x.AddConsumer<DeleteUserConsumer>();
@@ -57,6 +58,7 @@ builder.Services.AddMassTransit(x =>
         cfg.ReceiveEndpoint("user-service", e =>
         {
             e.ConfigureConsumer<GetUserConsumer>(context);
+            e.ConfigureConsumer<GetUserByAuthIdConsumer>(context);
             e.ConfigureConsumer<GetListUserConsumer>(context);
             e.ConfigureConsumer<CreateUserConsumer>(context);
             e.ConfigureConsumer<DeleteUserConsumer>(context);

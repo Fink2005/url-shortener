@@ -98,6 +98,10 @@ builder.Services.AddScoped(provider =>
 builder.Services.AddScoped(provider =>
     provider.GetRequiredService<IBus>().CreateRequestClient<DeleteShortUrlRequest>());
 
+// ✅ Register RequestClient for User Service (get userId from authId)
+builder.Services.AddScoped(provider =>
+    provider.GetRequiredService<IBus>().CreateRequestClient<GetUserByAuthIdRequest>());
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>

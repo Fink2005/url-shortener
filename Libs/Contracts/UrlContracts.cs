@@ -66,6 +66,10 @@ public record DeleteShortUrlResponse(bool Success);
 public record GetUrlsByUserRequest(Guid UserId);
 public record GetUrlsByUserResponse(Guid UserId, List<UrlDto> Urls);
 
+// ===== BATCH GET URLS BY MULTIPLE USERS =====
+public record GetUrlsByUserIdsRequest(List<Guid> UserIds);
+public record GetUrlsByUserIdsResponse(Dictionary<Guid, List<UrlDto>> UrlsByUserId);
+
 public class UrlDto
 {
     public Guid Id { get; set; }

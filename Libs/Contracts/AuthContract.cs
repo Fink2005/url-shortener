@@ -77,3 +77,15 @@ public record GetAuthByIdResponse(
     string Role,
     bool IsEmailVerified
 );
+
+// Batch get auth by multiple Ids
+public record GetAuthsByIdsRequest(List<Guid> Ids);
+
+public record GetAuthsByIdsResponse(List<AuthByIdDto> AuthUsers);
+
+public class AuthByIdDto
+{
+    public Guid Id { get; set; }
+    public string Role { get; set; } = string.Empty;
+    public bool IsEmailVerified { get; set; }
+}

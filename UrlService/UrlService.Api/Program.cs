@@ -36,6 +36,7 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<GetListShortUrlConsumer>();
     x.AddConsumer<DeleteShortUrlConsumer>();
     x.AddConsumer<GetUrlsByUserConsumer>();
+    x.AddConsumer<GetUrlsByUserIdsConsumer>();
 
     x.UsingRabbitMq((context, cfg) =>
     {
@@ -46,13 +47,15 @@ builder.Services.AddMassTransit(x =>
             h.Password("guest");
         });
 
-        cfg.ReceiveEndpoint("auth-service-queue", e =>
+        cfg.ReceiveEndpoint("url-service", e =>
         {
             e.ConfigureConsumer<CreateShortUrlConsumer>(context);
             e.ConfigureConsumer<ResolveShortUrlConsumer>(context);
             e.ConfigureConsumer<DisableShortUrlConsumer>(context);
             e.ConfigureConsumer<GetListShortUrlConsumer>(context);
             e.ConfigureConsumer<DeleteShortUrlConsumer>(context);
+            e.ConfigureConsumer<GetUrlsByUserConsumer>(context);
+            e.ConfigureConsumer<GetUrlsByUserIdsConsumer>(context);
         });
     });
 });

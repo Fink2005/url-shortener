@@ -10,6 +10,7 @@ public interface IShortUrlRepository
     Task<bool> CodeExistsAsync(ShortCode code, CancellationToken ct = default);
     Task<List<ShortUrl>> GetAllAsync(CancellationToken ct = default);
     Task<List<ShortUrl>> GetAllByUserIdAsync(Guid userId, CancellationToken ct = default);
+    Task<List<ShortUrl>> GetByUserIdsAsync(List<Guid> userIds, CancellationToken ct = default);
     Task<ShortUrl?> FindByIdAsync(Guid id, CancellationToken ct = default);
     Task<ShortUrl?> FindExpiredDateAsync(DateTime expireAt, CancellationToken ct = default);
     Task<ShortUrl?> DeleteByIdAsync(Guid id, CancellationToken ct = default);

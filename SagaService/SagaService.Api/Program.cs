@@ -23,8 +23,10 @@ builder.Services.AddMassTransit(x =>
     x.AddRequestClient<Contracts.Users.GetListUsersRequest>(TimeSpan.FromSeconds(30));
     x.AddRequestClient<Contracts.Users.DeleteUserRequest>(TimeSpan.FromSeconds(10));
     x.AddRequestClient<Contracts.Auth.GetAuthByIdRequest>(TimeSpan.FromSeconds(10));
+    x.AddRequestClient<Contracts.Auth.GetAuthsByIdsRequest>(TimeSpan.FromSeconds(15));
     x.AddRequestClient<Contracts.Auth.DeleteAuthRequest>(TimeSpan.FromSeconds(10));
     x.AddRequestClient<Contracts.Url.GetUrlsByUserRequest>(TimeSpan.FromSeconds(10));
+    x.AddRequestClient<Contracts.Url.GetUrlsByUserIdsRequest>(TimeSpan.FromSeconds(15));
 
     x.UsingRabbitMq((context, cfg) =>
     {

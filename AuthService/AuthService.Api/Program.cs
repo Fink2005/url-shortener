@@ -49,6 +49,7 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<GetAllAuthUsersConsumer>();
     x.AddConsumer<PromoteToAdminConsumer>();
     x.AddConsumer<GetAuthByIdConsumer>();
+    x.AddConsumer<GetAuthsByIdsConsumer>();
 
     x.UsingRabbitMq((context, cfg) =>
     {
@@ -71,6 +72,8 @@ builder.Services.AddMassTransit(x =>
             e.ConfigureConsumer<AssignDefaultRoleConsumer>(context);
             e.ConfigureConsumer<GetAllAuthUsersConsumer>(context);
             e.ConfigureConsumer<PromoteToAdminConsumer>(context);
+            e.ConfigureConsumer<GetAuthByIdConsumer>(context);
+            e.ConfigureConsumer<GetAuthsByIdsConsumer>(context);
         });
     });
 });
