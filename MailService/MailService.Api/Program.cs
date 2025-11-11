@@ -17,7 +17,9 @@ builder.Services.AddSingleton<IMailSender>(new ResendMailSender(resendApiKey, fr
 
 // Redis connection
 var redisConnection = builder.Configuration["Redis:Connection"] ?? "redis:6379";
-var redis = ConnectionMultiplexer.Connect(redisConnection);
+var options = ConfigurationOptions.Parse(redisConnection);
+options.AbortOnConnectFail = false;  // Retry instead of failing
+var redis = ConnectionMultiplexer.Connect(options);
 builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
 builder.Services.AddSingleton<ITokenService, RedisTokenService>();
 
