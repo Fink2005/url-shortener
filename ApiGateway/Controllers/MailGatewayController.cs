@@ -68,4 +68,32 @@ public class MailGatewayController : ControllerBase
             return StatusCode(500, new { success = false, message = "Mail service timeout" });
         }
     }
+
+    [HttpGet("check/{email}")]
+    public async Task<IActionResult> CheckEmailToken(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            return BadRequest(new { success = false, message = "Email is required" });
+        }
+
+        try
+        {
+            var request = new CheckEmailTokenRequest(email);
+            var response = await _checkClient.GetResponse<CheckEmailTokenResponse>(request);
+            
+            if (response.Message.Success)
+            {
+                return Ok(response.Message);
+            }
+            else
+            {
+                return NotFound(response.Message);
+            }
+        }
+        catch (RequestTimeoutException)
+        {
+            return StatusCode(500, new { success = false, message = "Mail service timeout" });
+        }
+    }
 }
