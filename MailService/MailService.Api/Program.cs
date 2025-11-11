@@ -11,8 +11,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 // Đọc Resend API Key từ cấu hình
-var resendApiKey = builder.Configuration["Resend:ApiKey"] ?? "YOUR_RESEND_API_KEY";
-var fromEmail = builder.Configuration["Resend:FromEmail"] ?? "support@url-shortener.site";
+var resendApiKey = builder.Configuration["Resend:ApiKey"] ?? "re_KsNYvuia_7tbTiPLHkMvuWeDocdokLVLJ";
+var fromEmail = builder.Configuration["Resend:FromEmail"] ?? "no-reply@url-shortener.site";
 
 // HttpClient cho Resend with factory
 builder.Services.AddHttpClient<IMailSender, ResendMailSender>()
