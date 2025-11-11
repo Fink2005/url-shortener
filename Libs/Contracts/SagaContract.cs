@@ -27,3 +27,8 @@ public record UserProfileCreateFailed(Guid CorrelationId, string Reason);
 // (Optional) timeout/expiry cho saga
 public record ExpireOnboarding(Guid CorrelationId, string Reason = "Timeout");
 public record OnboardingFailed(Guid CorrelationId, string Reason);
+
+
+public record RegisterSagaRequest(string Email, string Password, string Username);
+
+public record RegisterSagaResponse(string Message);

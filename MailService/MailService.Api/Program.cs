@@ -24,7 +24,7 @@ builder.Services.AddHttpClient<IMailSender, ResendMailSender>()
     .AddTypedClient<IMailSender>((httpClient, sp) => new ResendMailSender(httpClient, fromEmail));
 
 // Redis connection
-var redisConnection = builder.Configuration["Redis:Connection"] ?? "redis:6379";
+var redisConnection = builder.Configuration["Redis:Connection"] ?? "localhost:6379";
 var options = ConfigurationOptions.Parse(redisConnection);
 options.AbortOnConnectFail = false;  // Retry instead of failing
 var redis = ConnectionMultiplexer.Connect(options);
@@ -40,7 +40,8 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<CheckEmailTokenConsumer>();
     x.UsingRabbitMq((context, cfg) =>
     {
-        cfg.Host("rabbitmq", "/", h =>
+        var rabbitmqHost = builder.Configuration["RabbitMq:Host"] ?? "localhost";
+        cfg.Host(rabbitmqHost, "/", h =>
         {
             h.Username("guest");
             h.Password("guest");

@@ -24,9 +24,17 @@ builder.Services.AddMassTransit(x =>
             r.LockStatementProvider = new PostgresLockStatementProvider();
         });
 
+    // Register Consumers
+    x.AddConsumer<RegisterSagaConsumer>();
+
+    // Register Request Clients
+    x.AddRequestClient<SendConfirmationEmailCommand>(TimeSpan.FromSeconds(30));
+    x.AddRequestClient<VerifyAuthUserEmailCommand>(TimeSpan.FromSeconds(30));
+
     x.UsingRabbitMq((context, cfg) =>
     {
-        cfg.Host("rabbitmq", "/", h =>
+        var rabbitmqHost = builder.Configuration["RabbitMq:Host"] ?? "localhost";
+        cfg.Host(rabbitmqHost, "/", h =>
         {
             h.Username("guest");
             h.Password("guest");

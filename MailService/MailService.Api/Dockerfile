@@ -19,8 +19,8 @@ RUN dotnet publish "MailService.Api.csproj" -c Release -o /app/publish /p:UseApp
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=publish /app/publish .
-COPY ["MailService/MailService.Api/appsettings.json", "."]
-COPY ["MailService/MailService.Api/appsettings.Development.json", "."]
+RUN rm -f appsettings.Development.json
 EXPOSE 8080
 ENV ASPNETCORE_URLS=http://+:8080
+ENV ASPNETCORE_ENVIRONMENT=Production
 ENTRYPOINT ["dotnet", "MailService.Api.dll"]

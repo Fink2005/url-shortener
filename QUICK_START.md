@@ -1,4 +1,93 @@
-# 🚀 URL Shortener - Quick Start Guide
+# Quick Start - Local Development
+
+## Step 1: Start Dependencies
+
+Open terminal 1 and run:
+
+```bash
+cd /Users/fink/Desktop/Workspace/url-shortener
+docker-compose -f docker-compose.dev.yml up
+```
+
+Wait for:
+
+- ✅ RabbitMQ healthy
+- ✅ Redis healthy
+
+## Step 2: Start Services
+
+Open new terminals for each service:
+
+### Terminal 2 - AuthService
+
+```bash
+cd /Users/fink/Desktop/Workspace/url-shortener/AuthService/AuthService.Api
+dotnet run
+```
+
+### Terminal 3 - MailService
+
+```bash
+cd /Users/fink/Desktop/Workspace/url-shortener/MailService/MailService.Api
+dotnet run
+```
+
+### Terminal 4 - UserService
+
+```bash
+cd /Users/fink/Desktop/Workspace/url-shortener/UserService/UserService.Api
+dotnet run
+```
+
+### Terminal 5 - UrlService
+
+```bash
+cd /Users/fink/Desktop/Workspace/url-shortener/UrlService/UrlService.Api
+dotnet run
+```
+
+### Terminal 6 - SagaService
+
+```bash
+cd /Users/fink/Desktop/Workspace/url-shortener/SagaService/SagaService.Api
+dotnet run
+```
+
+### Terminal 7 - ApiGateway
+
+```bash
+cd /Users/fink/Desktop/Workspace/url-shortener/ApiGateway
+dotnet run
+```
+
+## 📍 Access Points
+
+- **API Gateway**: http://localhost:5050
+- **AuthService**: http://localhost:5002
+- **MailService**: http://localhost:5004
+- **UserService**: http://localhost:5001
+- **UrlService**: http://localhost:5003
+- **SagaService**: http://localhost:5005
+- **RabbitMQ Dashboard**: http://localhost:15672 (guest/guest)
+
+## Test Email Confirmation
+
+```bash
+curl -X POST http://localhost:5050/mail/send-confirmation
+  -H "Content-Type: application/json"
+  -d '{"email":"syptgcs230361@fpt.edu.vn"}'
+```
+
+## Stop Everything
+
+Press Ctrl+C in Terminal 1 (docker-compose)
+Then Ctrl+C in other terminals (services will stop)
+
+OR run:
+
+```bash
+docker-compose -f docker-compose.dev.yml down
+```
 
 ## 📋 Tóm tắt hệ thống
 

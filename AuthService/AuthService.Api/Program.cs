@@ -11,10 +11,11 @@ using AuthService.Infrastructure.Services;
 using AuthService.Api.Consumers;
 using AuthService.Application.Commands;
 using AuthService.Application.Abstractions.Security;
+using AuthService.Api.Saga.Consumers;
 using FluentValidation;
 var builder = WebApplication.CreateBuilder(args);
 
-// EF Core
+// EF Core  
 builder.Services.AddDbContext<AuthDbContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"),
         x => x.MigrationsAssembly("AuthService.Infrastructure")));
@@ -39,12 +40,13 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<RefreshTokenConsumer>();
     x.AddConsumer<LogoutConsumer>();
     x.AddConsumer<DeleteAuthConsumer>();
-    x.AddConsumer<CreateAuthUserConsumer>();
+    x.AddConsumer<RegisterAuthSagaConsumer>();
     x.AddConsumer<AssignDefaultRoleConsumer>();
 
     x.UsingRabbitMq((context, cfg) =>
     {
-        cfg.Host("rabbitmq", "/", h =>
+        var rabbitmqHost = builder.Configuration["RabbitMq:Host"] ?? "localhost";
+        cfg.Host(rabbitmqHost, "/", h =>
         {
             h.Username("guest");
             h.Password("guest");
@@ -57,7 +59,7 @@ builder.Services.AddMassTransit(x =>
             e.ConfigureConsumer<RefreshTokenConsumer>(context);
             e.ConfigureConsumer<LogoutConsumer>(context);
             e.ConfigureConsumer<DeleteAuthConsumer>(context);
-            e.ConfigureConsumer<CreateAuthUserConsumer>(context);
+            e.ConfigureConsumer<RegisterAuthSagaConsumer>(context);
             e.ConfigureConsumer<AssignDefaultRoleConsumer>(context);
         });
     });
@@ -67,21 +69,6 @@ builder.Services.AddMassTransit(x =>
 var jwt = builder.Configuration.GetSection("Jwt");
 var key = Encoding.UTF8.GetBytes(jwt["Secret"]!);
 
-// builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-//     .AddJwtBearer(o =>
-//     {
-//         o.TokenValidationParameters = new()
-//         {
-//             ValidateIssuer = true,
-//             ValidIssuer = jwt["Issuer"],
-//             ValidateAudience = true,
-//             ValidAudience = jwt["Audience"],
-//             ValidateIssuerSigningKey = true,
-//             IssuerSigningKey = new SymmetricSecurityKey(key),
-//             ValidateLifetime = true,
-//             ClockSkew = TimeSpan.Zero
-//         };
-//     });
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -95,8 +82,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// app.UseAuthentication(); // nếu bạn có controller cần authorize
-// app.UseAuthorization();
 
 app.MapControllers();
 app.Run();

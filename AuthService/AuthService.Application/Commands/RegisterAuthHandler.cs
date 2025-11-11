@@ -42,8 +42,6 @@ public class RegisterAuthHandler
         await _repo.AddAsync(user);
         await _repo.SaveChangesAsync();
 
-        // Note: Event publishing is now handled by RegisterAuthConsumer
-        // to ensure it's published before the response is sent to the gateway
 
         return new RegisterAuthResponse(true);
     }

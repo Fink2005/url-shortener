@@ -7,12 +7,10 @@ namespace AuthService.Api.Consumers;
 public class RegisterAuthConsumer : IConsumer<RegisterAuthRequest>
 {
     private readonly RegisterAuthHandler _handler;
-    private readonly IPublishEndpoint _publishEndpoint;
 
-    public RegisterAuthConsumer(RegisterAuthHandler handler, IPublishEndpoint publishEndpoint)
+    public RegisterAuthConsumer(RegisterAuthHandler handler)
     {
         _handler = handler;
-        _publishEndpoint = publishEndpoint;
     }
 
     public async Task Consume(ConsumeContext<RegisterAuthRequest> context)
@@ -20,11 +18,6 @@ public class RegisterAuthConsumer : IConsumer<RegisterAuthRequest>
         try
         {
             var result = await _handler.Handle(context.Message);
-
-            // Publish event để trigger saga TRƯỚC khi respond
-            await _publishEndpoint.Publish(context.Message);
-            Console.WriteLine($"✓ RegisterAuthRequest published for {context.Message.Email}");
-
             // Respond to gateway
             await context.RespondAsync(result);
         }
