@@ -10,10 +10,12 @@ namespace MailService.Api.Consumers;
 public class SendMailConsumer : IConsumer<SendConfirmationEmailCommand>
 {
     private readonly IMailSender _mailSender;
+    private readonly ITokenService _tokenService;
 
-    public SendMailConsumer(IMailSender mailSender)
+    public SendMailConsumer(IMailSender mailSender, ITokenService tokenService)
     {
         _mailSender = mailSender;
+        _tokenService = tokenService;
     }
 
     public async Task Consume(ConsumeContext<SendConfirmationEmailCommand> context)
@@ -33,6 +35,7 @@ public class SendMailConsumer : IConsumer<SendConfirmationEmailCommand>
                             .token-box {{ background-color: #fff; border: 2px solid #007bff; padding: 15px; text-align: center; margin: 20px 0; }}
                             .token-code {{ font-size: 24px; font-weight: bold; color: #007bff; letter-spacing: 2px; }}
                             .footer {{ font-size: 12px; color: #999; text-align: center; padding-top: 20px; }}
+                            .expiry {{ color: #ff6b6b; font-weight: bold; }}
                         </style>
                     </head>
                     <body>
@@ -41,12 +44,12 @@ public class SendMailConsumer : IConsumer<SendConfirmationEmailCommand>
                                 <h1>Email Confirmation</h1>
                             </div>
                             <div class='content'>
-                                <p>Xin chào!</p>
+                                <p>Xin chào {message.Username}!</p>
                                 <p>Cảm ơn bạn đã đăng ký. Vui lòng xác nhận email của bạn bằng cách sử dụng mã dưới đây:</p>
                                 <div class='token-box'>
                                     <div class='token-code'>{message.ConfirmationToken}</div>
                                 </div>
-                                <p>Mã xác nhận này sẽ hết hạn trong 24 giờ.</p>
+                                <p class='expiry'>⏰ Mã xác nhận này sẽ hết hạn trong <strong>5 phút</strong>.</p>
                                 <p>Nếu bạn không tạo tài khoản này, vui lòng bỏ qua email này.</p>
                                 <div class='footer'>
                                     <p>&copy; {DateTime.UtcNow.Year} URL Shortener. All rights reserved.</p>
@@ -64,12 +67,16 @@ public class SendMailConsumer : IConsumer<SendConfirmationEmailCommand>
                 Body = htmlBody
             };
 
+            // Save token to Redis with 5-minute expiry
+            await _tokenService.SaveTokenAsync(message.Email, message.ConfirmationToken, expiryMinutes: 5);
+
+            // Send email
             await _mailSender.SendMailAsync(mailRequest);
 
             // Publish event that email was sent successfully
             await context.Publish(new EmailConfirmationSent(message.CorrelationId));
 
-            Console.WriteLine($"✓ Confirmation email sent to {message.Email}");
+            Console.WriteLine($"✓ Confirmation email sent to {message.Email} (token expires in 5 minutes)");
         }
         catch (Exception ex)
         {

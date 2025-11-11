@@ -15,6 +15,21 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --appendfsync everysec
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   authservice:
     build:
       context: .
@@ -72,8 +87,11 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - Resend__ApiKey=re_XD7QzvX6_GfF6sbmYjdEXKhGFrNGa76TN
       - Resend__FromEmail=onboarding@resend.dev
+      - Redis__Connection=redis:6379
     depends_on:
       rabbitmq:
+        condition: service_healthy
+      redis:
         condition: service_healthy
 
   sagaservice:
@@ -110,3 +128,7 @@ services:
 networks:
   default:
     name: url-shortener-network
+
+volumes:
+  redis_data:
+    driver: local

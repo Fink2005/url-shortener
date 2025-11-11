@@ -4,6 +4,7 @@ using MailService.Application.Abstractions;
 using MailService.Infrastructure.Services;
 using MassTransit;
 using MailService.Api.Consumers;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,12 @@ builder.Services.AddControllers();
 var resendApiKey = builder.Configuration["Resend:ApiKey"] ?? "YOUR_RESEND_API_KEY";
 var fromEmail = builder.Configuration["Resend:FromEmail"] ?? "noreply@example.com";
 builder.Services.AddSingleton<IMailSender>(new ResendMailSender(resendApiKey, fromEmail));
+
+// Redis connection
+var redisConnection = builder.Configuration["Redis:Connection"] ?? "redis:6379";
+var redis = ConnectionMultiplexer.Connect(redisConnection);
+builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
+builder.Services.AddSingleton<ITokenService, RedisTokenService>();
 
 // MassTransit cấu hình RabbitMQ
 builder.Services.AddMassTransit(x =>
