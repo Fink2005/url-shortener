@@ -1,6 +1,8 @@
+using System;
 using MassTransit;
 using Contracts.Users;
 using Contracts.Auth;
+using Contracts.Mail;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +31,26 @@ builder.Services.AddScoped(provider =>
     provider.GetRequiredService<IBus>().CreateRequestClient<LogoutRequest>());
 builder.Services.AddScoped(provider =>
     provider.GetRequiredService<IBus>().CreateRequestClient<DeleteAuthRequest>());
+
+// ✅ Register RequestClient for verification
+builder.Services.AddScoped(provider =>
+{
+    var client = provider.GetRequiredService<IBus>().CreateRequestClient<VerifyEmailRequest>(
+        timeout: TimeSpan.FromSeconds(30));
+    return client;
+});
+builder.Services.AddScoped(provider =>
+{
+    var client = provider.GetRequiredService<IBus>().CreateRequestClient<CheckEmailTokenRequest>(
+        timeout: TimeSpan.FromSeconds(30));
+    return client;
+});
+builder.Services.AddScoped(provider =>
+{
+    var client = provider.GetRequiredService<IBus>().CreateRequestClient<SendConfirmationEmailRequest>(
+        timeout: TimeSpan.FromSeconds(30));
+    return client;
+});
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

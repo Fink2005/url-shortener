@@ -15,18 +15,15 @@ public class RegisterAuthHandler
     private readonly PasswordHasher<string> _hasher = new();
     private readonly IJwtTokenService _jwt;
     private readonly IValidator<RegisterAuthRequest> _validator;
-    private readonly IPublishEndpoint _publishEndpoint;
 
     public RegisterAuthHandler(
         IAuthUserRepository repo,
         IJwtTokenService jwt,
-        IValidator<RegisterAuthRequest> validator,
-        IPublishEndpoint publishEndpoint)
+        IValidator<RegisterAuthRequest> validator)
     {
         _repo = repo;
         _jwt = jwt;
         _validator = validator;
-        _publishEndpoint = publishEndpoint;
     }
 
     public async Task<RegisterAuthResponse> Handle(RegisterAuthRequest req)
@@ -42,14 +39,11 @@ public class RegisterAuthHandler
         var hash = _hasher.HashPassword(req.Username, req.Password);
         var user = new AuthUser(req.Username, req.Email, hash, Role.User);
 
-        var (_, hashRefresh, expireAt) = _jwt.GenerateRefreshToken();
-        user.SetRefreshToken(hashRefresh, expireAt);
-
         await _repo.AddAsync(user);
         await _repo.SaveChangesAsync();
 
-        // 🔥 Publish event để trigger saga
-        await _publishEndpoint.Publish(req);
+        // Note: Event publishing is now handled by RegisterAuthConsumer
+        // to ensure it's published before the response is sent to the gateway
 
         return new RegisterAuthResponse(true);
     }

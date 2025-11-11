@@ -5,4 +5,7 @@
   <ItemGroup>
     <ProjectReference Include="../MailService.Domain/MailService.Domain.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="StackExchange.Redis" Version="2.8.29" />
+  </ItemGroup>
 </Project>

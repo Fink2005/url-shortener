@@ -25,6 +25,9 @@ builder.Services.AddSingleton<ITokenService, RedisTokenService>();
 builder.Services.AddMassTransit(x =>
 {
     x.AddConsumer<SendMailConsumer>();
+    x.AddConsumer<SendConfirmationEmailConsumer>();
+    x.AddConsumer<VerifyEmailConsumer>();
+    x.AddConsumer<CheckEmailTokenConsumer>();
     x.UsingRabbitMq((context, cfg) =>
     {
         cfg.Host("rabbitmq", "/", h =>
@@ -36,6 +39,9 @@ builder.Services.AddMassTransit(x =>
         cfg.ReceiveEndpoint("mail-service", e =>
         {
             e.ConfigureConsumer<SendMailConsumer>(context);
+            e.ConfigureConsumer<SendConfirmationEmailConsumer>(context);
+            e.ConfigureConsumer<VerifyEmailConsumer>(context);
+            e.ConfigureConsumer<CheckEmailTokenConsumer>(context);
         });
     });
 });

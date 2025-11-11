@@ -53,6 +53,7 @@ Email confirmation tokens now stored in **Redis** with **5-minute expiry**. Toke
 ## Redis Setup
 
 ### Service Started
+
 ```yaml
 redis:
   image: redis:7-alpine
@@ -66,6 +67,7 @@ redis:
 ```
 
 ### Connection String
+
 ```
 redis:6379  (Docker network)
 localhost:6379  (Local development)
@@ -78,6 +80,7 @@ localhost:6379  (Local development)
 **TTL:** 5 minutes (300 seconds)
 
 ### Example
+
 ```
 Key: email-token:user@example.com
 Value: 550e8400-e29b-41d4-a716-446655440000
@@ -87,6 +90,7 @@ Expiry: 5 minutes
 ## API Endpoints
 
 ### 1. Verify Email Token
+
 ```
 POST /api/verification/verify
 Content-Type: application/json
@@ -98,6 +102,7 @@ Content-Type: application/json
 ```
 
 **Successful Response (200):**
+
 ```json
 {
   "success": true,
@@ -106,6 +111,7 @@ Content-Type: application/json
 ```
 
 **Failed Response (401):**
+
 ```json
 {
   "success": false,
@@ -114,16 +120,19 @@ Content-Type: application/json
 ```
 
 ### 2. Check Token Exists (Debug Only)
+
 ```
 GET /api/verification/check/{email}
 ```
 
 **Example:**
+
 ```
 GET /api/verification/check/user@example.com
 ```
 
 **Response (if exists):**
+
 ```json
 {
   "success": true,
@@ -133,6 +142,7 @@ GET /api/verification/check/user@example.com
 ```
 
 **Response (if not exists):**
+
 ```json
 {
   "success": false,
@@ -145,15 +155,18 @@ GET /api/verification/check/user@example.com
 Token is displayed in the email:
 
 ```html
-<div class='token-box'>
-  <div class='token-code'>550e8400-e29b-41d4-a716-446655440000</div>
+<div class="token-box">
+  <div class="token-code">550e8400-e29b-41d4-a716-446655440000</div>
 </div>
-<p class='expiry'>⏰ Mã xác nhận này sẽ hết hạn trong <strong>5 phút</strong>.</p>
+<p class="expiry">
+  ⏰ Mã xác nhận này sẽ hết hạn trong <strong>5 phút</strong>.
+</p>
 ```
 
 ## Code Changes
 
 ### 1. SendMailConsumer Updates
+
 ```csharp
 public class SendMailConsumer : IConsumer<SendConfirmationEmailCommand>
 {
@@ -180,6 +193,7 @@ public class SendMailConsumer : IConsumer<SendConfirmationEmailCommand>
 ```
 
 ### 2. ITokenService Interface
+
 ```csharp
 public interface ITokenService
 {
@@ -191,6 +205,7 @@ public interface ITokenService
 ```
 
 ### 3. Redis Registration (Program.cs)
+
 ```csharp
 // Redis connection
 var redisConnection = builder.Configuration["Redis:Connection"] ?? "redis:6379";
@@ -202,6 +217,7 @@ builder.Services.AddSingleton<ITokenService, RedisTokenService>();
 ## Configuration
 
 ### appsettings.json
+
 ```json
 {
   "Redis": {
@@ -215,6 +231,7 @@ builder.Services.AddSingleton<ITokenService, RedisTokenService>();
 ```
 
 ### docker-compose.yml (MailService)
+
 ```yaml
 mailservice:
   environment:
@@ -230,6 +247,7 @@ mailservice:
 ### Full Flow Test
 
 **1. Register User:**
+
 ```bash
 curl -X POST http://localhost:5050/auth/register \
   -H "Content-Type: application/json" \
@@ -243,6 +261,7 @@ curl -X POST http://localhost:5050/auth/register \
 **Expected:** Email sent with token (check inbox)
 
 **2. Extract Token from Email or Redis:**
+
 ```bash
 # Check if token exists
 curl http://localhost:5004/api/verification/check/test@example.com
@@ -255,6 +274,7 @@ curl http://localhost:5004/api/verification/check/test@example.com
 ```
 
 **3. Verify Token (First Time - Success):**
+
 ```bash
 curl -X POST http://localhost:5004/api/verification/verify \
   -H "Content-Type: application/json" \
@@ -271,6 +291,7 @@ curl -X POST http://localhost:5004/api/verification/verify \
 ```
 
 **4. Verify Again (Should Fail - Token Deleted):**
+
 ```bash
 curl -X POST http://localhost:5004/api/verification/verify \
   -H "Content-Type: application/json" \
@@ -311,17 +332,18 @@ DEL email-token:test@example.com
 
 ## Troubleshooting
 
-| Issue | Cause | Solution |
-|-------|-------|----------|
-| Redis connection refused | Redis not running or wrong host | Check `docker-compose ps redis`, verify `Redis__Connection` |
-| Token not saved | ITokenService not registered | Check `Program.cs` has `AddSingleton<ITokenService, RedisTokenService>()` |
-| Token disappears before 5 min | TTL issue or expired | Check Redis `TTL email-token:<email>`, verify no manual delete |
-| Verification endpoint 404 | VerificationController not mapped | Ensure `app.MapControllers()` in Program.cs |
-| Token not in email | Saga not publishing command | Check SagaService logs for SendConfirmationEmailCommand |
+| Issue                         | Cause                             | Solution                                                                  |
+| ----------------------------- | --------------------------------- | ------------------------------------------------------------------------- |
+| Redis connection refused      | Redis not running or wrong host   | Check `docker-compose ps redis`, verify `Redis__Connection`               |
+| Token not saved               | ITokenService not registered      | Check `Program.cs` has `AddSingleton<ITokenService, RedisTokenService>()` |
+| Token disappears before 5 min | TTL issue or expired              | Check Redis `TTL email-token:<email>`, verify no manual delete            |
+| Verification endpoint 404     | VerificationController not mapped | Ensure `app.MapControllers()` in Program.cs                               |
+| Token not in email            | Saga not publishing command       | Check SagaService logs for SendConfirmationEmailCommand                   |
 
 ## Logs to Watch
 
 ### MailService Logs
+
 ```
 [Redis] Token saved for user@example.com, expires in 5 minutes
 ✓ Confirmation email sent to user@example.com (token expires in 5 minutes)
@@ -329,6 +351,7 @@ DEL email-token:test@example.com
 ```
 
 ### Redis Logs
+
 ```
 * Ready to accept connections
 ```
@@ -352,5 +375,6 @@ DEL email-token:test@example.com
 - ⚠️ TODO: Log verification attempts for audit trail
 
 ---
+
 Created: 2025-11-11
 Updated: 2025-11-11

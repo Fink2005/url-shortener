@@ -1,3 +1,5 @@
+using System;
+using System.Threading.Tasks;
 using StackExchange.Redis;
 
 namespace MailService.Application.Abstractions;
@@ -44,11 +46,11 @@ public class RedisTokenService : ITokenService
         {
             var db = _redis.GetDatabase();
             var key = $"{TokenKeyPrefix}{email}";
-            
+
             // Lưu token với TTL
             var result = await db.StringSetAsync(
-                key, 
-                token, 
+                key,
+                token,
                 expiry: TimeSpan.FromMinutes(expiryMinutes)
             );
 
@@ -72,7 +74,7 @@ public class RedisTokenService : ITokenService
         {
             var db = _redis.GetDatabase();
             var key = $"{TokenKeyPrefix}{email}";
-            
+
             // Ambil token từ Redis
             var storedToken = await db.StringGetAsync(key);
 
@@ -111,7 +113,7 @@ public class RedisTokenService : ITokenService
         {
             var db = _redis.GetDatabase();
             var key = $"{TokenKeyPrefix}{email}";
-            
+
             var token = await db.StringGetAsync(key);
             return token.HasValue ? token.ToString() : null;
         }
@@ -128,7 +130,7 @@ public class RedisTokenService : ITokenService
         {
             var db = _redis.GetDatabase();
             var key = $"{TokenKeyPrefix}{email}";
-            
+
             var result = await db.KeyDeleteAsync(key);
             return result;
         }

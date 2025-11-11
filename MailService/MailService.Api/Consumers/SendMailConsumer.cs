@@ -44,7 +44,7 @@ public class SendMailConsumer : IConsumer<SendConfirmationEmailCommand>
                                 <h1>Email Confirmation</h1>
                             </div>
                             <div class='content'>
-                                <p>Xin chào {message.Username}!</p>
+                                <p>Xin chào!</p>
                                 <p>Cảm ơn bạn đã đăng ký. Vui lòng xác nhận email của bạn bằng cách sử dụng mã dưới đây:</p>
                                 <div class='token-box'>
                                     <div class='token-code'>{message.ConfirmationToken}</div>

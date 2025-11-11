@@ -8,6 +8,9 @@ public class AuthUser
     public string Username { get; private set; } = default!;
     public string Email { get; private set; } = default!;
     public string PasswordHash { get; private set; } = string.Empty;
+
+    public bool IsEmailVerified { get; private set; } = false;
+
     public Role Role { get; private set; } = Role.User;
 
     // Refresh token (lưu HASH + hạn)

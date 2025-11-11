@@ -16,6 +16,7 @@ public class AuthDbContext : DbContext
             e.HasIndex(x => x.Email).IsUnique();
             e.Property(x => x.Username).HasMaxLength(100);
             e.Property(x => x.Email).HasMaxLength(200);
+            e.Property(x => x.IsEmailVerified).HasDefaultValue(false);
             e.Property(x => x.PasswordHash).HasMaxLength(500);
             e.Property(x => x.RefreshTokenHash).HasMaxLength(128);
         });
