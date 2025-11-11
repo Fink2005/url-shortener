@@ -1,6 +1,7 @@
 using System;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Text.Json;
 using System.Threading.Tasks;
 using MailService.Application.Abstractions;
 using MailService.Domain.Entities;
@@ -9,24 +10,21 @@ namespace MailService.Infrastructure.Services;
 
 public class ResendMailSender : IMailSender
 {
-    private readonly string _apiKey;
     private readonly HttpClient _httpClient;
     private readonly string _fromEmail;
 
-    public ResendMailSender(string apiKey, string fromEmail = "noreply@example.com")
+    public ResendMailSender(HttpClient httpClient, string fromEmail)
     {
-        _apiKey = apiKey;
+        _httpClient = httpClient;
         _fromEmail = fromEmail;
-        _httpClient = new HttpClient();
-        _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_apiKey}");
     }
 
     public async Task SendMailAsync(MailRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request.To) || string.IsNullOrWhiteSpace(request.Subject))
-        {
-            throw new ArgumentException("Email and Subject are required.");
-        }
+        if (string.IsNullOrWhiteSpace(request.To))
+            throw new ArgumentException("Recipient email is required.");
+        if (string.IsNullOrWhiteSpace(request.Subject))
+            throw new ArgumentException("Subject is required.");
 
         var payload = new
         {
@@ -36,23 +34,23 @@ public class ResendMailSender : IMailSender
             html = request.Body
         };
 
-        try
-        {
-            var response = await _httpClient.PostAsJsonAsync("https://api.resend.com/emails", payload);
+        var response = await _httpClient.PostAsJsonAsync("https://api.resend.com/emails", payload);
 
-            if (!response.IsSuccessStatusCode)
-            {
-                var errorContent = await response.Content.ReadAsStringAsync();
-                Console.WriteLine($"✗ Resend API error ({response.StatusCode}): {errorContent}");
-                response.EnsureSuccessStatusCode();
-            }
-
-            Console.WriteLine($"✓ Email sent to {request.To}");
-        }
-        catch (Exception ex)
+        if (!response.IsSuccessStatusCode)
         {
-            Console.WriteLine($"✗ Failed to send email to {request.To}: {ex.Message}");
-            throw;
+            var error = await response.Content.ReadAsStringAsync();
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"[✗] Failed to send email → {request.To}");
+            Console.WriteLine($"Status: {response.StatusCode}");
+            Console.WriteLine($"Response: {error}");
+            Console.ResetColor();
+            throw new HttpRequestException($"Resend API error: {response.StatusCode}");
         }
+
+        var successJson = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var id = successJson.GetProperty("id").GetString();
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine($"[✓] Email sent successfully → {request.To} (ID: {id})");
+        Console.ResetColor();
     }
 }

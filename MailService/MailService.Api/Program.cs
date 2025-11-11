@@ -12,8 +12,16 @@ builder.Services.AddControllers();
 
 // Đọc Resend API Key từ cấu hình
 var resendApiKey = builder.Configuration["Resend:ApiKey"] ?? "YOUR_RESEND_API_KEY";
-var fromEmail = builder.Configuration["Resend:FromEmail"] ?? "noreply@example.com";
-builder.Services.AddSingleton<IMailSender>(new ResendMailSender(resendApiKey, fromEmail));
+var fromEmail = builder.Configuration["Resend:FromEmail"] ?? "support@url-shortener.site";
+
+// HttpClient cho Resend with factory
+builder.Services.AddHttpClient<IMailSender, ResendMailSender>()
+    .ConfigureHttpClient(client =>
+    {
+        client.DefaultRequestHeaders.Add("Authorization", $"Bearer {resendApiKey}");
+        client.DefaultRequestHeaders.Add("Accept", "application/json");
+    })
+    .AddTypedClient<IMailSender>((httpClient, sp) => new ResendMailSender(httpClient, fromEmail));
 
 // Redis connection
 var redisConnection = builder.Configuration["Redis:Connection"] ?? "redis:6379";
@@ -49,6 +57,9 @@ builder.Services.AddMassTransit(x =>
 });
 
 var app = builder.Build();
+
+
+
 
 app.UseRouting();
 app.MapControllers();
