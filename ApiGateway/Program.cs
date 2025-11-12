@@ -148,6 +148,16 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
+// ✅ Configure Forwarded Headers (Trust Cloudflare proxy)
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor 
+                     | Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto
+});
+
+// ✅ Security Headers Middleware (for Cloudflare/Browser security)
+app.UseMiddleware<SecurityHeadersMiddleware>();
+
 // Global Exception Handling Middleware
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
