@@ -7,3 +7,6 @@ public record CheckEmailTokenResponse(bool Success, string Message, string? Toke
 
 public record SendConfirmationEmailRequest(string Email);
 public record SendConfirmationEmailResponse(bool Success);
+
+public record ResendConfirmationEmailRequest(string Email);
+public record ResendConfirmationEmailResponse(bool Success, string Message);

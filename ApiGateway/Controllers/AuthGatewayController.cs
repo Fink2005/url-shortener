@@ -136,6 +136,52 @@ public class AuthGatewayController : ControllerBase
     }
 
     // =========================
+    // POST /auth/resend-verification
+    // =========================
+    [HttpPost("resend-verification")]
+    public async Task<IActionResult> ResendVerificationEmail([FromBody] ResendVerificationEmailDto request)
+    {
+        try
+        {
+            // Validate input
+            if (string.IsNullOrWhiteSpace(request.Email))
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Email is required"
+                });
+            }
+
+            Console.WriteLine($"📬 [Gateway] Resend verification email request for {request.Email}");
+
+            // Send request to MailService to resend confirmation email
+            var busControl = _registerClient as IBus 
+                ?? throw new InvalidOperationException("Cannot access message bus");
+
+            // Publish event to resend email (MailService will handle it)
+            await busControl.Publish(new Contracts.Mail.ResendConfirmationEmailRequest(request.Email));
+
+            Console.WriteLine($"✅ [Gateway] Resend verification request published for {request.Email}");
+
+            return Ok(new
+            {
+                success = true,
+                message = "If your email is registered and not verified, a new verification link will be sent. Please check your inbox."
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ [Gateway] Resend verification error: {ex.Message}");
+            return StatusCode(500, new
+            {
+                success = false,
+                message = "An error occurred while resending verification email"
+            });
+        }
+    }
+
+    // =========================
     // POST /auth/login
     // =========================
     [HttpPost("login")]
@@ -194,3 +240,7 @@ public class AuthGatewayController : ControllerBase
     }
 
 }
+
+// DTOs for API Gateway requests
+public record VerifyEmailRequestDto(string Email, string Token);
+public record ResendVerificationEmailDto(string Email, string? Username = null);
