@@ -32,6 +32,12 @@ public class LoginAuthHandler
         if (result == PasswordVerificationResult.Failed)
             throw new UnauthorizedAccessException("Invalid username or password");
 
+        // ✅ Check if email is verified
+        if (!user.IsEmailVerified)
+        {
+            throw new UnauthorizedAccessException("Please verify your email before logging in. Check your inbox for the verification link.");
+        }
+
         var access = _jwt.GenerateAccessToken(user);
         var (plainRefresh, hashRefresh, expireAt) = _jwt.GenerateRefreshToken();
 
