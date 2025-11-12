@@ -1,7 +1,6 @@
 using MassTransit;
 using SagaService.Domain.States;
 using SagaService.Api.Consumers;
-using Contracts.Mail;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +17,7 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<DeleteUserSagaConsumer>();
 
     // Register Request Clients
-    x.AddRequestClient<SendConfirmationEmailRequest>(TimeSpan.FromSeconds(30));
+    // Note: SendConfirmationEmailRequest removed - Saga handles email via SendConfirmationEmailCommand
     x.AddRequestClient<Contracts.Users.GetUserRequest>(TimeSpan.FromSeconds(10));
     x.AddRequestClient<Contracts.Users.GetListUsersRequest>(TimeSpan.FromSeconds(30));
     x.AddRequestClient<Contracts.Users.DeleteUserRequest>(TimeSpan.FromSeconds(10));
