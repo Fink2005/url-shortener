@@ -1,5 +1,6 @@
 using MassTransit;
 using Contracts.Saga.Auth;
+using Contracts.Auth;
 
 namespace SagaService.Api.Consumers;
 
@@ -19,11 +20,14 @@ public class RegisterRequestedConsumer : IConsumer<RegisterRequestedEvent>
         Console.WriteLine($"📬 [SagaService] Username: {msg.Username}");
         Console.WriteLine($"📬 ========================================");
 
-        // RegisterRequestedEvent will be consumed by UserOnboardingStateMachine
-        // The Saga will handle sending confirmation email
-        Console.WriteLine($"✅ [SagaService] Event processed. Saga will handle email confirmation.");
+        // Publish RegisterAuthRequest to start UserOnboardingStateMachine
+        await context.Publish(new RegisterAuthRequest(
+            msg.Username,
+            msg.Email,
+            msg.Password
+        ));
+
+        Console.WriteLine($"✅ [SagaService] Published RegisterAuthRequest to start Saga");
         Console.WriteLine($"========================================");
-        
-        await Task.CompletedTask;
     }
 }
