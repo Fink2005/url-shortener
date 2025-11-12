@@ -52,6 +52,7 @@ A production-ready URL shortening service built with .NET 9.0, implementing a mi
 ### Microservices Components
 
 #### 1. **API Gateway** (Entry Point)
+
 - **Responsibility**: Single entry point for all client requests
 - **Port**: 5050
 - **Key Features**:
@@ -64,6 +65,7 @@ A production-ready URL shortening service built with .NET 9.0, implementing a mi
   - Swagger UI for API documentation
 
 #### 2. **Auth Service** (Authentication & Authorization)
+
 - **Responsibility**: User authentication, token management, and role-based access control
 - **Port**: 5002
 - **Database**: `auth_db` (PostgreSQL)
@@ -77,6 +79,7 @@ A production-ready URL shortening service built with .NET 9.0, implementing a mi
   - Redis-based blacklist for revoked tokens
 
 #### 3. **User Service** (User Profile Management)
+
 - **Responsibility**: User profile CRUD operations
 - **Port**: 5001
 - **Database**: `user_db` (PostgreSQL)
@@ -87,6 +90,7 @@ A production-ready URL shortening service built with .NET 9.0, implementing a mi
   - AuthId to UserId mapping
 
 #### 4. **URL Service** (URL Shortening Core)
+
 - **Responsibility**: Short URL generation, storage, and resolution
 - **Port**: 5003
 - **Database**: `url_db` (PostgreSQL)
@@ -100,6 +104,7 @@ A production-ready URL shortening service built with .NET 9.0, implementing a mi
   - URL deletion
 
 #### 5. **Saga Service** (Orchestration & Workflows)
+
 - **Responsibility**: Orchestrating complex multi-service transactions
 - **Port**: 5005
 - **Database**: In-Memory (State Machine)
@@ -111,6 +116,7 @@ A production-ready URL shortening service built with .NET 9.0, implementing a mi
   - Batch query optimization (N+1 problem solution)
 
 #### 6. **Mail Service** (Email Notifications)
+
 - **Responsibility**: Sending transactional emails
 - **Port**: 5004
 - **Database**: Redis (queue/cache)
@@ -123,14 +129,16 @@ A production-ready URL shortening service built with .NET 9.0, implementing a mi
 ## 🎯 Design Patterns & Principles
 
 ### 1. **Microservices Architecture**
+
 - **Pattern**: Service-oriented architecture with independently deployable services
-- **Benefits**: 
+- **Benefits**:
   - Scalability per service
   - Technology independence
   - Fault isolation
   - Easy deployment and updates
 
 ### 2. **Event-Driven Architecture**
+
 - **Pattern**: Asynchronous message-based communication
 - **Implementation**: MassTransit + RabbitMQ
 - **Benefits**:
@@ -140,6 +148,7 @@ A production-ready URL shortening service built with .NET 9.0, implementing a mi
   - Horizontal scalability
 
 ### 3. **SAGA Pattern**
+
 - **Pattern**: Distributed transaction management
 - **Implementation**: State Machine-based saga using MassTransit
 - **Use Cases**:
@@ -152,8 +161,9 @@ A production-ready URL shortening service built with .NET 9.0, implementing a mi
   - No distributed locks required
 
 ### 4. **CQRS (Command Query Responsibility Segregation)**
+
 - **Pattern**: Separation of read and write operations
-- **Implementation**: 
+- **Implementation**:
   - Commands: `CreateUserHandler`, `DeleteAuthHandler`
   - Queries: `GetUserHandler`, `GetListUrlsHandler`
 - **Benefits**:
@@ -162,6 +172,7 @@ A production-ready URL shortening service built with .NET 9.0, implementing a mi
   - Clear separation of concerns
 
 ### 5. **Repository Pattern**
+
 - **Pattern**: Abstraction layer for data access
 - **Implementation**: Interface-based repositories
   - `IAuthUserRepository`
@@ -173,6 +184,7 @@ A production-ready URL shortening service built with .NET 9.0, implementing a mi
   - Database independence
 
 ### 6. **Gateway Pattern**
+
 - **Pattern**: Single entry point for all client requests
 - **Implementation**: API Gateway with request routing
 - **Benefits**:
@@ -181,6 +193,7 @@ A production-ready URL shortening service built with .NET 9.0, implementing a mi
   - Load balancing and rate limiting
 
 ### 7. **Dependency Injection**
+
 - **Pattern**: Inversion of Control (IoC)
 - **Implementation**: Built-in .NET DI container
 - **Benefits**:
@@ -189,6 +202,7 @@ A production-ready URL shortening service built with .NET 9.0, implementing a mi
   - Configuration-based behavior
 
 ### 8. **Clean Architecture / Onion Architecture**
+
 - **Pattern**: Domain-centric layered architecture
 - **Layers** (per service):
   ```
@@ -203,6 +217,7 @@ A production-ready URL shortening service built with .NET 9.0, implementing a mi
   - Easy to change infrastructure
 
 ### 9. **Circuit Breaker Pattern**
+
 - **Pattern**: Fault tolerance for service communication
 - **Implementation**: MassTransit request timeout configuration
 - **Benefits**:
@@ -211,8 +226,9 @@ A production-ready URL shortening service built with .NET 9.0, implementing a mi
   - Service resilience
 
 ### 10. **Batch Processing Pattern**
+
 - **Pattern**: Optimize N+1 query problem
-- **Implementation**: 
+- **Implementation**:
   - `GetAuthsByIdsRequest` (batch auth retrieval)
   - `GetUrlsByUserIdsRequest` (batch URL retrieval)
 - **Benefits**:
@@ -223,16 +239,19 @@ A production-ready URL shortening service built with .NET 9.0, implementing a mi
 ## 🛠️ Technology Stack
 
 ### Backend Framework
+
 - **.NET 9.0** - Latest LTS version of .NET
 - **ASP.NET Core** - Web API framework
 - **C# 13** - Programming language
 
 ### Communication & Messaging
+
 - **MassTransit 8.5.5** - Distributed application framework
 - **RabbitMQ** - Message broker for async communication
 - **Request/Response Pattern** - Synchronous-like communication over async messages
 
 ### Database & Storage
+
 - **PostgreSQL** - Primary relational database (3 separate databases)
   - `auth_db` - Authentication data
   - `user_db` - User profiles
@@ -242,6 +261,7 @@ A production-ready URL shortening service built with .NET 9.0, implementing a mi
 - **Redis 7** - Caching and token blacklist storage
 
 ### Authentication & Security
+
 - **JWT (JSON Web Tokens)** - Stateless authentication
 - **Microsoft.AspNetCore.Authentication.JwtBearer** - JWT middleware
 - **BCrypt** - Password hashing (via ASP.NET Core Identity)
@@ -249,24 +269,29 @@ A production-ready URL shortening service built with .NET 9.0, implementing a mi
 - **CORS** - Cross-Origin Resource Sharing policy
 
 ### Validation & Configuration
+
 - **FluentValidation 12.1** - Request validation
 - **Microsoft.Extensions.Options** - Configuration binding
 
 ### Email Service
+
 - **Resend API** - Transactional email provider
 - **SMTP Alternative** - Modern email API
 
 ### Containerization & Deployment
+
 - **Docker** - Container platform
 - **Docker Compose** - Multi-container orchestration
 - **AWS RDS** - Managed PostgreSQL (Production)
 - **Cloudflare** - CDN, SSL/TLS, DNS, and DDoS protection
 
 ### API Documentation
+
 - **Swagger/OpenAPI** - API documentation and testing UI
 - **Swashbuckle.AspNetCore 9.0** - Swagger integration
 
 ### Development Tools
+
 - **Visual Studio Code / Rider** - IDE
 - **Git** - Version control
 - **Postman / Swagger UI** - API testing
@@ -274,6 +299,7 @@ A production-ready URL shortening service built with .NET 9.0, implementing a mi
 ## 📊 Database Schema
 
 ### auth_db (Authentication)
+
 ```sql
 AuthUsers
 ├── Id (PK, UUID)
@@ -289,6 +315,7 @@ AuthUsers
 ```
 
 ### user_db (User Profiles)
+
 ```sql
 Users
 ├── Id (PK, UUID)
@@ -300,6 +327,7 @@ Users
 ```
 
 ### url_db (Short URLs)
+
 ```sql
 ShortUrls
 ├── Id (PK, UUID)
@@ -315,6 +343,7 @@ ShortUrls
 ## 🔄 Application Flow
 
 ### 1. User Registration Flow (SAGA Pattern)
+
 ```
 1. Client → API Gateway: POST /auth/register
 2. API Gateway → Saga Service: RegisterRequestedEvent
@@ -334,6 +363,7 @@ ShortUrls
 ```
 
 ### 2. Email Verification Flow
+
 ```
 1. User clicks email link: GET /auth/verify-email?token={token}
 2. API Gateway → Auth Service: VerifyEmailRequest(token)
@@ -343,6 +373,7 @@ ShortUrls
 ```
 
 ### 3. Login Flow
+
 ```
 1. Client → API Gateway: POST /auth/login
 2. API Gateway → Auth Service: LoginAuthRequest(email, password)
@@ -354,6 +385,7 @@ ShortUrls
 ```
 
 ### 4. URL Shortening Flow
+
 ```
 1. Client → API Gateway: POST /url/create (with JWT)
 2. API Gateway: Validates JWT + extracts authId
@@ -367,6 +399,7 @@ ShortUrls
 ```
 
 ### 5. URL Resolution Flow
+
 ```
 1. Client → API Gateway: GET /url/{shortCode}
 2. API Gateway → URL Service: ResolveShortUrlRequest(shortCode)
@@ -376,6 +409,7 @@ ShortUrls
 ```
 
 ### 6. Admin Dashboard Flow (Optimized Batch Queries)
+
 ```
 1. Admin → API Gateway: GET /admin/dashboard/users (with Admin JWT)
 2. API Gateway: Validates admin role
@@ -402,6 +436,7 @@ ShortUrls
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/Fink2005/url-shortener.git
    cd url-shortener
@@ -410,16 +445,19 @@ ShortUrls
 2. **Configure environment variables**
 
    Update `docker-compose.yml` with your configuration:
+
    - PostgreSQL connection strings (or use AWS RDS)
    - JWT secret key
    - Resend API key for email service
 
 3. **Build and run with Docker Compose**
+
    ```bash
    docker-compose up -d --build
    ```
 
    This will start all services:
+
    - RabbitMQ (Port 5672, Management UI: 15672)
    - Redis (Port 6379)
    - AuthService (Port 5002)
@@ -430,6 +468,7 @@ ShortUrls
    - ApiGateway (Port 5050)
 
 4. **Verify services are running**
+
    ```bash
    docker ps
    ```
@@ -442,16 +481,19 @@ ShortUrls
 ### Running Locally (Development)
 
 1. **Start infrastructure services**
+
    ```bash
    docker-compose up -d rabbitmq redis
    ```
 
 2. **Update appsettings.json in each service**
+
    - Set `RabbitMq:Host` to `localhost`
    - Set `Redis:Connection` to `localhost:6379`
    - Configure database connection strings
 
 3. **Run database migrations**
+
    ```bash
    # Auth Service
    cd AuthService/AuthService.Api
@@ -467,6 +509,7 @@ ShortUrls
    ```
 
 4. **Start each service**
+
    ```bash
    # Terminal 1 - Auth Service
    cd AuthService/AuthService.Api
@@ -498,6 +541,7 @@ ShortUrls
 ### Authentication Endpoints
 
 #### Register New User
+
 ```http
 POST /auth/register
 Content-Type: application/json
@@ -515,6 +559,7 @@ Response: 200 OK
 ```
 
 #### Verify Email
+
 ```http
 GET /auth/verify-email?token={verification_token}
 
@@ -525,6 +570,7 @@ Response: 200 OK
 ```
 
 #### Login
+
 ```http
 POST /auth/login
 Content-Type: application/json
@@ -543,6 +589,7 @@ Response: 200 OK
 ```
 
 #### Refresh Token
+
 ```http
 POST /auth/refresh
 Content-Type: application/json
@@ -560,6 +607,7 @@ Response: 200 OK
 ```
 
 #### Logout
+
 ```http
 POST /auth/logout
 Authorization: Bearer {accessToken}
@@ -573,6 +621,7 @@ Response: 200 OK
 ### URL Shortening Endpoints
 
 #### Create Short URL
+
 ```http
 POST /url/create
 Authorization: Bearer {accessToken}
@@ -592,6 +641,7 @@ Response: 200 OK
 ```
 
 #### Resolve Short URL
+
 ```http
 GET /url/{shortCode}
 
@@ -600,6 +650,7 @@ Location: https://example.com/very-long-url
 ```
 
 #### Get User's URLs
+
 ```http
 GET /url/list
 Authorization: Bearer {accessToken}
@@ -621,6 +672,7 @@ Response: 200 OK
 ```
 
 #### Delete Short URL
+
 ```http
 DELETE /url/{shortCode}
 Authorization: Bearer {accessToken}
@@ -634,6 +686,7 @@ Response: 200 OK
 ### Admin Endpoints
 
 #### Get All Users with URLs (Admin Only)
+
 ```http
 GET /admin/dashboard/users
 Authorization: Bearer {adminAccessToken}
@@ -663,6 +716,7 @@ Response: 200 OK
 ```
 
 #### Promote User to Admin
+
 ```http
 POST /admin/promote/{userId}
 Authorization: Bearer {adminAccessToken}
@@ -674,6 +728,7 @@ Response: 200 OK
 ```
 
 #### Delete User (Cascade)
+
 ```http
 DELETE /admin/users/{userId}
 Authorization: Bearer {adminAccessToken}
@@ -687,23 +742,27 @@ Response: 200 OK
 ## 🔒 Security Features
 
 ### 1. Authentication & Authorization
+
 - **JWT Tokens**: Stateless authentication with 1-hour expiration
 - **Refresh Tokens**: Long-lived tokens for seamless re-authentication
 - **Role-Based Access Control**: User and Admin roles
 - **Token Blacklist**: Redis-based revoked token tracking
 
 ### 2. Rate Limiting
+
 - **IP-based limiting**: 100 requests per minute per IP
 - **Endpoint-specific limits**: Customizable per route
 - **DDoS protection**: Prevents abuse and overload
 
 ### 3. Input Validation
+
 - **FluentValidation**: Strong typing and validation rules
 - **Email validation**: Format and domain checks
 - **Password requirements**: Minimum length, complexity
 - **URL validation**: Format and protocol validation
 
 ### 4. Security Headers
+
 - `X-Content-Type-Options: nosniff`
 - `X-Frame-Options: DENY`
 - `X-XSS-Protection: 1; mode=block`
@@ -711,16 +770,19 @@ Response: 200 OK
 - `Strict-Transport-Security` (when behind HTTPS proxy)
 
 ### 5. CORS Policy
+
 - Configurable allowed origins
 - Method and header restrictions
 - Credentials support
 
 ### 6. Password Security
+
 - **BCrypt hashing**: Industry-standard password hashing
 - **Salt generation**: Unique salt per password
 - **No plain text storage**: Never store raw passwords
 
 ### 7. Email Verification
+
 - Required before full account access
 - Time-limited verification tokens
 - Prevents fake account creation
@@ -728,11 +790,13 @@ Response: 200 OK
 ## 🧪 Testing
 
 ### Manual Testing with Swagger
+
 1. Navigate to `http://localhost:5050/swagger`
 2. Use "Authorize" button to add JWT token
 3. Test endpoints interactively
 
 ### Example Test Flow
+
 ```bash
 # 1. Register user
 curl -X POST http://localhost:5050/auth/register \
@@ -769,21 +833,25 @@ curl -L http://localhost:5050/url/abc123X
 ## 📈 Performance Optimization
 
 ### 1. Batch Query Optimization
+
 - **Problem**: N+1 query problem in admin dashboard
 - **Solution**: Batch retrieval endpoints
 - **Result**: 201 queries → 3 queries (20x faster)
 
 ### 2. Caching Strategy
+
 - **Redis caching**: Frequently accessed data
 - **Token storage**: Fast token validation
 - **Session management**: Scalable user sessions
 
 ### 3. Asynchronous Processing
+
 - **Message-based communication**: Non-blocking operations
 - **Email sending**: Background processing
 - **Event propagation**: Eventual consistency
 
 ### 4. Database Indexing
+
 - Email columns (unique + indexed)
 - ShortCode (unique + indexed)
 - UserId foreign keys (indexed)
@@ -794,6 +862,7 @@ curl -L http://localhost:5050/url/abc123X
 ### Common Issues
 
 #### 1. Services not connecting to RabbitMQ
+
 ```bash
 # Check RabbitMQ is running
 docker ps | grep rabbitmq
@@ -806,6 +875,7 @@ docker logs authservice
 ```
 
 #### 2. Database connection errors
+
 ```bash
 # Verify PostgreSQL connection
 psql -h url-shortener-instance.cpicai0qavde.ap-southeast-1.rds.amazonaws.com -U postgres -d auth_db
@@ -816,16 +886,19 @@ dotnet ef migrations list
 ```
 
 #### 3. JWT token validation fails
+
 - Check JWT configuration in `appsettings.json`
 - Ensure secret key is consistent across services
 - Verify token expiration time
 
 #### 4. Email not sending
+
 - Check Resend API key configuration
 - Verify sender email domain is verified
 - Check MailService logs for errors
 
 #### 5. Rate limiting blocking requests
+
 - Adjust limits in `appsettings.RateLimit.json`
 - Check IP address being used
 - Clear rate limit cache (restart Redis)
@@ -835,6 +908,7 @@ dotnet ef migrations list
 ### Production Deployment (Ubuntu + Docker)
 
 1. **Install Docker on Ubuntu**
+
    ```bash
    sudo apt update
    sudo apt install docker.io docker-compose -y
@@ -843,29 +917,34 @@ dotnet ef migrations list
    ```
 
 2. **Clone repository on server**
+
    ```bash
    git clone https://github.com/Fink2005/url-shortener.git
    cd url-shortener
    ```
 
 3. **Configure environment variables**
+
    - Update `docker-compose.yml` with production settings
    - Set secure JWT secret
    - Configure production database
    - Set Resend API key
 
 4. **Deploy with Docker Compose**
+
    ```bash
    sudo docker-compose up -d --build
    ```
 
 5. **Setup Nginx reverse proxy** (recommended)
+
    ```bash
    sudo apt install nginx -y
    sudo nano /etc/nginx/sites-available/url-shortener
    ```
 
    Nginx configuration:
+
    ```nginx
    server {
        listen 80;
@@ -883,6 +962,7 @@ dotnet ef migrations list
    ```
 
    Enable site:
+
    ```bash
    sudo ln -s /etc/nginx/sites-available/url-shortener /etc/nginx/sites-enabled/
    sudo nginx -t
@@ -898,6 +978,7 @@ dotnet ef migrations list
 ## 📝 Configuration Files
 
 ### appsettings.json (API Gateway)
+
 ```json
 {
   "Jwt": {
@@ -912,6 +993,7 @@ dotnet ef migrations list
 ```
 
 ### appsettings.RateLimit.json
+
 ```json
 {
   "IpRateLimiting": {
@@ -948,6 +1030,7 @@ This project is licensed under the MIT License.
 ## 👨‍💻 Author
 
 **Fink2005**
+
 - GitHub: [@Fink2005](https://github.com/Fink2005)
 - Email: contact@url-shortener.site
 

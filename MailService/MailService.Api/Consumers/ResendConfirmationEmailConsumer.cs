@@ -91,7 +91,7 @@ public class ResendConfirmationEmailConsumer : IConsumer<ResendConfirmationEmail
         catch (Exception ex)
         {
             Console.WriteLine($"❌ [MailService] Error in ResendConfirmationEmailConsumer: {ex.Message}");
-            
+
             await context.RespondAsync(new ResendConfirmationEmailResponse(
                 false,
                 $"Failed to resend email: {ex.Message}"
