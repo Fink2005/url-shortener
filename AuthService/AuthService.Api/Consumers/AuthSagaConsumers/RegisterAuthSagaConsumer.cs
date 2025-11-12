@@ -1,19 +1,27 @@
 using MassTransit;
+using Contracts.Saga;
 using Contracts.Saga.Auth;
-using AuthService.Application.Commands;
+using FluentValidation;
 using Contracts.Auth;
+using Validators.Auth;
+using AuthService.Domain.Repositories;
 
 namespace AuthService.Api.Saga.Consumers;
 
 public class RegisterAuthSagaConsumer : IConsumer<RegisterRequestedEvent>
 {
-    private readonly RegisterAuthHandler _handler;
     private readonly IPublishEndpoint _publishEndpoint;
+    private readonly IValidator<RegisterAuthRequest> _validator;
+    private readonly IAuthUserRepository _repository;
 
-    public RegisterAuthSagaConsumer(RegisterAuthHandler handler, IPublishEndpoint publishEndpoint)
+    public RegisterAuthSagaConsumer(
+        IPublishEndpoint publishEndpoint,
+        IValidator<RegisterAuthRequest> validator,
+        IAuthUserRepository repository)
     {
-        _handler = handler;
         _publishEndpoint = publishEndpoint;
+        _validator = validator;
+        _repository = repository;
     }
 
     public async Task Consume(ConsumeContext<RegisterRequestedEvent> context)
@@ -22,35 +30,50 @@ public class RegisterAuthSagaConsumer : IConsumer<RegisterRequestedEvent>
         {
             Console.WriteLine($"📬 [AuthService] Received RegisterRequestedEvent for {context.Message.Email}");
 
-            // Convert Saga event to handler request
+            // Validate input
             var request = new RegisterAuthRequest(
                 context.Message.Username,
                 context.Message.Email,
                 context.Message.Password
             );
 
-            Console.WriteLine($"🔍 [AuthService] Calling handler to create user...");
-            var result = await _handler.Handle(request);
-            Console.WriteLine($"🔍 [AuthService] Handler returned Success = {result.Success}");
-
-            if (result.Success)
+            var validationResult = await _validator.ValidateAsync(request);
+            if (!validationResult.IsValid)
             {
-                Console.WriteLine($"✅ [AuthService] User created successfully: {context.Message.Email}");
-                Console.WriteLine($"📤 [AuthService] Publishing RegisterAuthRequest to start Saga...");
-
-                // Publish RegisterAuthRequest to start UserOnboardingStateMachine
-                await _publishEndpoint.Publish(new RegisterAuthRequest(
-                    context.Message.Username,
-                    context.Message.Email,
-                    context.Message.Password
-                ));
-
-                Console.WriteLine($"📨 [AuthService] Successfully published RegisterAuthRequest to start Saga");
+                var errors = string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage));
+                Console.WriteLine($"❌ [AuthService] Validation failed: {errors}");
+                throw new ValidationException($"Validation failed: {errors}");
             }
-            else
+
+            // Check if username already exists
+            var existingUser = await _repository.FindByUsernameAsync(context.Message.Username);
+            if (existingUser != null)
             {
-                Console.WriteLine($"⚠️ [AuthService] User creation failed but no exception thrown. NOT publishing event.");
+                Console.WriteLine($"❌ [AuthService] Username already exists: {context.Message.Username}");
+                throw new InvalidOperationException("Username already exists");
             }
+
+            // Check if email already exists
+            var existingEmail = await _repository.FindByEmailAsync(context.Message.Email);
+            if (existingEmail != null)
+            {
+                Console.WriteLine($"❌ [AuthService] Email already exists: {context.Message.Email}");
+                throw new InvalidOperationException("Email already exists");
+            }
+
+            Console.WriteLine($"✅ [AuthService] Validation passed for {context.Message.Email}");
+            Console.WriteLine($"📤 [AuthService] Publishing StartUserOnboarding to start Saga...");
+
+            // Publish StartUserOnboarding to start UserOnboardingStateMachine
+            // Saga will handle: create user → send email → create profile
+            await _publishEndpoint.Publish(new StartUserOnboarding(
+                Guid.NewGuid(),  // Generate new CorrelationId for Saga
+                context.Message.Username,
+                context.Message.Email,
+                context.Message.Password
+            ));
+
+            Console.WriteLine($"📨 [AuthService] Successfully published StartUserOnboarding to start Saga");
 
             // Respond back to Gateway
             await context.RespondAsync(new RegisterRequestedEvent(
@@ -59,21 +82,23 @@ public class RegisterAuthSagaConsumer : IConsumer<RegisterRequestedEvent>
                 context.Message.Password
             ));
         }
+        catch (ValidationException ex)
+        {
+            Console.WriteLine($"❌ [AuthService] Validation error: {ex.Message}");
+            throw;
+        }
         catch (InvalidOperationException ex)
         {
             // Lỗi business logic (username/email đã tồn tại) - KHÔNG gửi mail
-            Console.WriteLine($"❌ [AuthService] InvalidOperationException: {ex.Message}");
-            Console.WriteLine($"🚫 [AuthService] NOT publishing RegisterRequestedEvent - NO EMAIL will be sent!");
-
-            // QUAN TRỌNG: Throw lại exception để Gateway nhận được lỗi
-            // Nhưng KHÔNG publish event nên SagaService sẽ KHÔNG gửi mail
+            Console.WriteLine($"❌ [AuthService] Business logic error: {ex.Message}");
+            Console.WriteLine($"🚫 [AuthService] NOT publishing RegisterAuthRequest - NO EMAIL will be sent!");
             throw;
         }
         catch (Exception ex)
         {
             // Lỗi hệ thống khác
             Console.WriteLine($"❌ [AuthService] Unexpected error in RegisterAuthSagaConsumer: {ex.Message}");
-            Console.WriteLine($"🚫 [AuthService] NOT publishing RegisterRequestedEvent due to error!");
+            Console.WriteLine($"🚫 [AuthService] NOT publishing RegisterAuthRequest due to error!");
             throw;
         }
     }

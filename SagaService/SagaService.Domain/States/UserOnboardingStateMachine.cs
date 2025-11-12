@@ -15,7 +15,7 @@ public class UserOnboardingStateMachine : MassTransitStateMachine<UserOnboarding
     public State Failed { get; private set; } = null!;
 
     // Events
-    public Event<RegisterAuthRequest> OnboardingStarted { get; private set; } = null!;
+    public Event<StartUserOnboarding> OnboardingStarted { get; private set; } = null!;
     public Event<AuthUserCreated> AuthCreated { get; private set; } = null!;
     public Event<AuthUserCreateFailed> AuthCreateFailed { get; private set; } = null!;
     public Event<EmailConfirmationSent> EmailSent { get; private set; } = null!;
@@ -31,8 +31,8 @@ public class UserOnboardingStateMachine : MassTransitStateMachine<UserOnboarding
         // === Event correlation setup ===
         Event(() => OnboardingStarted, x =>
         {
-            x.CorrelateBy((state, ctx) => state.Email == ctx.Message.Email);
-            x.SelectId(ctx => Guid.NewGuid()); // Generate new CorrelationId for saga instance
+            x.CorrelateById(ctx => ctx.Message.CorrelationId);  // Use CorrelationId from StartUserOnboarding
+            x.SelectId(ctx => ctx.Message.CorrelationId); // Use CorrelationId from message
         });
 
         Event(() => AuthCreated, x =>

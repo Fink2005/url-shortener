@@ -44,6 +44,7 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<LogoutConsumer>();
     x.AddConsumer<DeleteAuthConsumer>();
     x.AddConsumer<RegisterAuthSagaConsumer>();
+    x.AddConsumer<CreateAuthUserSagaConsumer>();  // Consumer for Saga's CreateAuthUserCommand
     x.AddConsumer<VerifyAuthMailSagaConsumer>();
     x.AddConsumer<AssignDefaultRoleConsumer>();
     x.AddConsumer<GetAllAuthUsersConsumer>();
@@ -68,6 +69,7 @@ builder.Services.AddMassTransit(x =>
             e.ConfigureConsumer<LogoutConsumer>(context);
             e.ConfigureConsumer<DeleteAuthConsumer>(context);
             e.ConfigureConsumer<RegisterAuthSagaConsumer>(context);
+            e.ConfigureConsumer<CreateAuthUserSagaConsumer>(context);  // Configure consumer for Saga's CreateAuthUserCommand
             e.ConfigureConsumer<VerifyAuthMailSagaConsumer>(context);
             e.ConfigureConsumer<AssignDefaultRoleConsumer>(context);
             e.ConfigureConsumer<GetAllAuthUsersConsumer>(context);
