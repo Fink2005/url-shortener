@@ -167,11 +167,26 @@ app.UseCors("AllowAll");
 // ✅ Enable Rate Limiting (MUST be before Authentication/Authorization)
 app.UseIpRateLimiting();
 
-if (app.Environment.IsDevelopment())
+// ✅ Enable Swagger for all environments (Production included)
+app.UseSwagger(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    c.PreSerializeFilters.Add((swagger, httpReq) =>
+    {
+        // Support HTTPS when behind Cloudflare/reverse proxy
+        var scheme = httpReq.Headers["X-Forwarded-Proto"].FirstOrDefault() ?? httpReq.Scheme;
+        var host = httpReq.Headers["X-Forwarded-Host"].FirstOrDefault() ?? httpReq.Host.Value;
+        swagger.Servers = new List<Microsoft.OpenApi.Models.OpenApiServer>
+        {
+            new Microsoft.OpenApi.Models.OpenApiServer { Url = $"{scheme}://{host}" }
+        };
+    });
+});
+
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "URL Shortener API V1");
+    c.RoutePrefix = "swagger"; // Access at: /swagger
+});
 
 app.UseAuthentication();
 app.UseAuthorization();
