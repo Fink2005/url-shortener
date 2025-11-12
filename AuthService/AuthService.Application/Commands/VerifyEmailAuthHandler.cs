@@ -14,6 +14,10 @@ public class VerifyEmailAuthHandler
 
     public async Task<VerifyEmailAuthResponse> Handle(VerifyEmailAuthRequest request)
     {
+        // NOTE: Token validation is handled by MailService (via Redis)
+        // This handler is called ONLY AFTER MailService has validated the token
+        // and published EmailVerifiedEvent
+
         // Find user by email
         var user = await _authUserRepository.GetByEmailAsync(request.Email);
 

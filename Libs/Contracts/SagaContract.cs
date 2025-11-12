@@ -36,6 +36,7 @@ public record RegisterSagaResponse(string Message);
 
 // Verify Email Saga
 public record VerifyEmailRequestedEvent(string Email, string Token);
+public record VerifyEmailResponse(bool Success, string Message);
 public record EmailVerifiedEvent(Guid CorrelationId, string Email);
 public record EmailVerificationFailedEvent(Guid CorrelationId, string Email, string Reason);
 

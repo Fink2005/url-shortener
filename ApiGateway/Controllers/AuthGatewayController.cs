@@ -76,19 +76,44 @@ public class AuthGatewayController : ControllerBase
     {
         try
         {
+            // ✅ Validate input
+            if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Token))
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Email and token are required"
+                });
+            }
+
             Console.WriteLine($"📬 [Gateway] Received verify email request for {request.Email}");
 
-            var response = await _verifyEmailClient.GetResponse<VerifyEmailRequestedEvent>(
-                new VerifyEmailRequestedEvent(request.Email, request.Token)
+            // Send request to MailService for token validation
+            var response = await _verifyEmailClient.GetResponse<VerifyEmailResponse>(
+                new VerifyEmailRequestedEvent(request.Email, request.Token),
+                timeout: TimeSpan.FromSeconds(10)
             );
 
-            Console.WriteLine($"✅ [Gateway] Email verification completed for {request.Email}");
+            var result = response.Message;
 
-            return Ok(new
+            if (result.Success)
             {
-                success = true,
-                message = "Email verified successfully. User profile is being created."
-            });
+                Console.WriteLine($"✅ [Gateway] Email verified successfully for {request.Email}");
+                return Ok(new
+                {
+                    success = true,
+                    message = "Email verified successfully. User profile is being created."
+                });
+            }
+            else
+            {
+                Console.WriteLine($"❌ [Gateway] Email verification failed: {result.Message}");
+                return BadRequest(new
+                {
+                    success = false,
+                    message = result.Message
+                });
+            }
         }
         catch (RequestTimeoutException)
         {
@@ -96,7 +121,7 @@ public class AuthGatewayController : ControllerBase
             return StatusCode(408, new
             {
                 success = false,
-                message = "Request timeout"
+                message = "Request timeout. Please try again."
             });
         }
         catch (Exception ex)
@@ -105,7 +130,7 @@ public class AuthGatewayController : ControllerBase
             return StatusCode(500, new
             {
                 success = false,
-                message = ex.Message
+                message = "An error occurred during email verification"
             });
         }
     }

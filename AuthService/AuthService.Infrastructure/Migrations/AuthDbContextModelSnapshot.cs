@@ -66,7 +66,7 @@ namespace AuthService.Infrastructure.Migrations
                     b.HasIndex("Username")
                         .IsUnique();
 
-                    b.ToTable("AuthUsers");
+                    b.ToTable("AuthUsers", (string)null);
                 });
 #pragma warning restore 612, 618
         }

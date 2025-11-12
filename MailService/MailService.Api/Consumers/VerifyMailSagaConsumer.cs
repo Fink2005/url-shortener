@@ -56,6 +56,12 @@ public class VerifyMailSagaConsumer : IConsumer<VerifyEmailRequestedEvent>
                 ));
 
                 Console.WriteLine($"📨 [MailService] Published EmailVerifiedEvent to AuthService");
+
+                // ✅ Respond success to Gateway
+                await context.RespondAsync(new VerifyEmailResponse(
+                    true,
+                    "Email verified successfully"
+                ));
             }
             else
             {
@@ -67,10 +73,13 @@ public class VerifyMailSagaConsumer : IConsumer<VerifyEmailRequestedEvent>
                     email,
                     "Invalid or expired token"
                 ));
-            }
 
-            // Respond back to Gateway
-            await context.RespondAsync(new VerifyEmailRequestedEvent(email, token));
+                // ❌ Respond failure to Gateway
+                await context.RespondAsync(new VerifyEmailResponse(
+                    false,
+                    "Invalid or expired verification token"
+                ));
+            }
         }
         catch (Exception ex)
         {
