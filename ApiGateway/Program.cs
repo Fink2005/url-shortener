@@ -102,6 +102,17 @@ builder.Services.AddScoped(provider =>
 builder.Services.AddScoped(provider =>
     provider.GetRequiredService<IBus>().CreateRequestClient<GetUserByAuthIdRequest>());
 
+// ✅ Config CORS - Allow all origins for development/testing
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -139,6 +150,9 @@ var app = builder.Build();
 
 // Global Exception Handling Middleware
 app.UseMiddleware<GlobalExceptionMiddleware>();
+
+// ✅ Enable CORS (MUST be before Authentication/Authorization)
+app.UseCors("AllowAll");
 
 // ✅ Enable Rate Limiting (MUST be before Authentication/Authorization)
 app.UseIpRateLimiting();
