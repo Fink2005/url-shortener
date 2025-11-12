@@ -11,7 +11,7 @@ builder.Services.AddMassTransit(x =>
         .InMemoryRepository();
 
     // Register Consumers
-    x.AddConsumer<RegisterRequestedConsumer>();
+    // Note: RegisterRequestedConsumer removed - AuthService now publishes RegisterAuthRequest directly
     x.AddConsumer<GetUserWithUrlsConsumer>();
     x.AddConsumer<GetAllUsersWithUrlsConsumer>();
     x.AddConsumer<DeleteUserSagaConsumer>();

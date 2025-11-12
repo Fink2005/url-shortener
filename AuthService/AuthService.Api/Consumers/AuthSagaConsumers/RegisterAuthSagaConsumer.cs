@@ -36,16 +36,16 @@ public class RegisterAuthSagaConsumer : IConsumer<RegisterRequestedEvent>
             if (result.Success)
             {
                 Console.WriteLine($"✅ [AuthService] User created successfully: {context.Message.Email}");
-                Console.WriteLine($"📤 [AuthService] Publishing RegisterRequestedEvent to SagaService...");
+                Console.WriteLine($"📤 [AuthService] Publishing RegisterAuthRequest to start Saga...");
 
-                // Publish event for SagaService to orchestrate email sending
-                await _publishEndpoint.Publish(new RegisterRequestedEvent(
+                // Publish RegisterAuthRequest to start UserOnboardingStateMachine
+                await _publishEndpoint.Publish(new RegisterAuthRequest(
                     context.Message.Username,
                     context.Message.Email,
                     context.Message.Password
                 ));
 
-                Console.WriteLine($"📨 [AuthService] Successfully published RegisterRequestedEvent to SagaService");
+                Console.WriteLine($"📨 [AuthService] Successfully published RegisterAuthRequest to start Saga");
             }
             else
             {
