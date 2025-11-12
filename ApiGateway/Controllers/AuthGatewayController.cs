@@ -17,19 +17,22 @@ public class AuthGatewayController : ControllerBase
     private readonly IRequestClient<LogoutRequest> _logoutClient;
     private readonly IRequestClient<RegisterRequestedEvent> _registerClient;
     private readonly IRequestClient<VerifyEmailRequestedEvent> _verifyEmailClient;
+    private readonly IPublishEndpoint _publishEndpoint;
 
     public AuthGatewayController(
         IRequestClient<LoginAuthRequest> loginClient,
         IRequestClient<RefreshTokenRequest> refreshClient,
         IRequestClient<LogoutRequest> logoutClient,
         IRequestClient<RegisterRequestedEvent> registerClient,
-        IRequestClient<VerifyEmailRequestedEvent> verifyEmailClient)
+        IRequestClient<VerifyEmailRequestedEvent> verifyEmailClient,
+        IPublishEndpoint publishEndpoint)
     {
         _loginClient = loginClient;
         _refreshClient = refreshClient;
         _logoutClient = logoutClient;
         _registerClient = registerClient;
         _verifyEmailClient = verifyEmailClient;
+        _publishEndpoint = publishEndpoint;
     }
 
     // =========================
@@ -155,12 +158,8 @@ public class AuthGatewayController : ControllerBase
 
             Console.WriteLine($"📬 [Gateway] Resend verification email request for {request.Email}");
 
-            // Send request to MailService to resend confirmation email
-            var busControl = _registerClient as IBus 
-                ?? throw new InvalidOperationException("Cannot access message bus");
-
-            // Publish event to resend email (MailService will handle it)
-            await busControl.Publish(new Contracts.Mail.ResendConfirmationEmailRequest(request.Email));
+            // Publish event to MailService to resend confirmation email
+            await _publishEndpoint.Publish(new Contracts.Mail.ResendConfirmationEmailRequest(request.Email));
 
             Console.WriteLine($"✅ [Gateway] Resend verification request published for {request.Email}");
 
