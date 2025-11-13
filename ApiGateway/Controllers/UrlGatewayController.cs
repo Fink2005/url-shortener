@@ -65,6 +65,7 @@ public class UrlGatewayController : ControllerBase
     }
 
     // --- Resolve (mở link gốc) ---
+    [AllowAnonymous]  // ✅ Anyone can resolve short URLs (no login required)
     [HttpGet("{code}")]
     public async Task<IActionResult> Resolve([FromRoute] string code)
     {
